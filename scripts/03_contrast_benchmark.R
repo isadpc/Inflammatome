@@ -81,8 +81,16 @@ ranked.df <- ranked.df %>%
   group_by(Contrast) %>%
   group_modify(~ add_row(.x, 
                          idx = dim(filter(Final_Annotation_List, Gene.type == "protein_coding"))[1],
+                         idx_ROC = dim(filter(Final_Annotation_List, Gene.type == "protein_coding"))[1],
                          marker_count = dim(union)[1],
-                         Contrast = .x$Contrast[1]))
+                         Contrast = .x$Contrast[1])) 
+
+# create proportion of genes covered columns (0 to 1)
+ranked.df <- ranked.df %>%
+  group_by(Contrast) %>%
+  mutate(p_annotation = idx/dim(Final_Annotation_List)[1],
+         p_ROC = idx_ROC/dim(Final_Annotation_List)[1],
+         p_markers = marker_count/dim(union)[1])
 
 ## AUC threshold selection -----------------------------------------------------
 # Initialize empty df to store rank agg. lists benchmarked against gold set
@@ -95,15 +103,10 @@ select.AUC.df <- data.frame(
   ENSP.ID = character(),
   stat = double(),
   enr = integer(),
+  idx_ROC = integer(),
   auc_threshold = double(),
   num_contrasts = integer()
 )
-
-# create proportion of genes covered columns (0 to 1)
-ranked.df <- ranked.df %>%
-  group_by(Contrast) %>%
-  mutate(p_annotation = idx/dim(Final_Annotation_List)[1],
-         p_markers = marker_count/dim(union)[1])
 
 # produce rank agg. lists using different AUC thresholds for contrast inclusion
 #for (i in seq(0, 1, 0.1)){
@@ -130,6 +133,7 @@ select.AUC.df <- select.AUC.df %>%
   group_by(auc_threshold) %>%
   group_modify(~ add_row(.x, 
                          Position = dim(filter(Final_Annotation_List, Gene.type == "protein_coding"))[1],
+                         idx_ROC = dim(filter(Final_Annotation_List, Gene.type == "protein_coding"))[1],
                          enr = dim(union)[1],
                          auc_threshold = .x$auc_threshold[1]))
 
@@ -138,7 +142,8 @@ select.AUC.df <- select.AUC.df %>%
 select.AUC.df <- select.AUC.df %>%
   group_by(auc_threshold) %>%
   mutate(p_annotation = Position/dim(Final_Annotation_List)[1],
-         p_markers = enr/dim(union)[1])
+         p_markers = enr/dim(union)[1],
+         p_ROC = idx_ROC/dim(Final_Annotation_List)[1])
 
 # Calculate AUC of resulting rank agg. lists
 select.AUC.df <- select.AUC.df %>%
@@ -153,7 +158,7 @@ select.AUC.df <- select.AUC.df %>%
   unnest(cols = c(data, AUC_p)) %>%
   ungroup()
 
-write_tsv(select.AUC.df, "data/03_AUC_threshold_selection.tsv")
+#write_tsv(select.AUC.df, "data/03_AUC_threshold_selection.tsv")
 
 # compare AUCs and diseases and tissues included
 max(select.AUC.df$AUC)
@@ -236,7 +241,19 @@ ggsave("figures/03_AUC_threshold_selection_zoom.png",
 # diseases and tissues
 selected.contrasts <- select_contrast(ranked.df, .6) 
 
-#selected.contrasts <- read_tsv("data/03_selected_contrasts.tsv")
+selected.contrasts.original <- read_tsv("data/03_selected_contrasts.tsv")
+
+identical(selected.contrasts, selected.contrasts.original)
+identical(selected.contrasts$Contrast, selected.contrasts.original$Contrast)
+identical(selected.contrasts$include, selected.contrasts.original$include)
+identical(round(selected.contrasts$AUC_p, 2), round(selected.contrasts.original$AUC_p, 2))
+
+approxfun(ranked.df$p_annotation[ranked.df$Contrast =="01_GSE131282_MS_ctl"], ranked.df$p_markers[ranked.df$Contrast =="01_GSE131282_MS_ctl"])
+approxfun(ranked.df$p_annotation[71:18216], ranked.df$p_markers[71:18216])
+length(ranked.df$p_annotation[ranked.df$Contrast =="01_GSE131282_MS_ctl"])
+approxfun(c(1,2,2,3,4,10,40), c(20, 25, 27, 50, 55, 55, 56))
+approxfun(c(1,2,3,4,10,40), c(20, 25, 27, 50, 55,  56))
+approxfun(c(1,2,3,4,10,40), c(20, 25, 50, 55, 55, 56))
 
 selected.contrasts %>%
   filter(include=="yes") %>%

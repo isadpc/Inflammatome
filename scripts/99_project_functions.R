@@ -388,19 +388,27 @@ count_markers <- function(filepath, gold_set, coding_only, intersect_only, inter
     df <- df %>% dplyr::rename(t = stat, 
                  adj.P.Val = padj)
   })
-  # initialize 
-  count <- 0 
-  # microarray version
+ 
   df <- df %>% 
     arrange(desc(t)) %>%
     add_column(marker_count = NA) 
   df$idx <- 1:length(df$ENSG.ID)
   
+  # ROC-like version
+  # initialize 
+  pos_count <- 0 
+  neg_count <- 0
+  marker_count <-c()
+  idx_ROC <- c()
+  
   for (i in 1:length(df$ENSG.ID)){
     if (df$ENSG.ID[i] %in% gold_set$ENSG.ID){
-      count <- count+1
+      pos_count <- pos_count+1
+    } else {
+      neg_count <- neg_count+1
     }
-    df$marker_count[i] <- count
+    df$marker_count[i] <- pos_count
+    df$idx_ROC[i] <- neg_count
   }
   
   df <- df %>%
@@ -552,15 +560,21 @@ BIRRA_return_all=function(data, prior=0.05, num.bin=50, num.iter=15, return.all=
 ## Contrast selection ----------------------------------------------------------
 # function to calculate auc for each contrast
 calculate_auc <- function(contrast){
-  curve <- approxfun(contrast$idx, contrast$marker_count)
+  curve <- approxfun(contrast$idx, contrast$marker_count, ties = "ordered")
   auc <- integrate(curve, min(contrast$idx), max(contrast$idx), subdivisions = 10000)
-  return(data.frame(AUC = auc$value))
+  
+  ROC_curve <- approxfun(contrast$idx_ROC, contrast$marker_count, ties = "ordered")
+  ROC_auc <- integrate(ROC_curve, min(contrast$idx_ROC), max(contrast$idx_ROC), subdivisions = 10000)
+  
+  return(data.frame(AUC = auc$value, AUC_ROC = ROC_auc$value))
 }
 
 calculate_auc_p <- function(contrast){
-  curve <- approxfun(contrast$p_annotation, contrast$p_markers)
+  curve <- approxfun(contrast$p_annotation, contrast$p_markers, ties = "ordered")
   auc <- integrate(curve, min(contrast$p_annotation), max(contrast$p_annotation), subdivisions = 10000)
-  return(data.frame(AUC_p = auc$value))
+  ROC_curve <- approxfun(contrast$p_ROC, contrast$p_markers, ties = "ordered")
+  ROC_auc <- integrate(ROC_curve, min(contrast$p_ROC), max(contrast$p_ROC), subdivisions = 10000)
+  return(data.frame(AUC_p = auc$value, AUC_ROC_p = ROC_auc$value))
 }
 
 # function to select contrast
@@ -605,9 +619,11 @@ select_contrast <- function(df, auc.cutoff){
 
 # function to calculate auc for each rank agg list (used for choosing AUC threshold for contrast inclusion)
 calculate_auc_rank <- function(rank){
-  curve <- approxfun(rank$Position, rank$enr)
+  curve <- approxfun(rank$Position, rank$enr, ties = "ordered")
   auc <- integrate(curve, min(rank$Position), max(rank$Position), subdivisions = 1000)
-  return(data.frame(AUC = auc$value))
+  ROC_curve <- approxfun(rank$idx_ROC, rank$enr, ties = "ordered")
+  ROC_auc <- integrate(ROC_curve, min(rank$idx_ROC), max(rank$idx_ROC), subdivisions = 1000)
+  return(data.frame(AUC = auc$value, AUC_ROC = ROC_auc$value))
 }
 
 # function to create a color palette asigning grey to excluded contrasts
@@ -660,11 +676,28 @@ rank_aggregation <- function(contrast_list, gene_type){
 ## Count marker occurences in rank aggregated list -----------------------------
 count_markers_rank <- function(list, gold_set){
   n <- dim(list)[1]
-  list$enr = 0; prev = 0
+  # list$enr = 0; prev = 0
+  # for (i in 1:n){
+  #   if (list[i,"ENSG.ID"] %in% gold_set$ENSG.ID){
+  #     list[i,"enr"] = prev+1; prev = prev+1 } else {list[i,"enr"] = prev}
+  # }
+  # return(list)
+  
+  pos_count <- 0 
+  neg_count <- 0
+  enr <-c()
+  idx_ROC <- c()
+  
   for (i in 1:n){
     if (list[i,"ENSG.ID"] %in% gold_set$ENSG.ID){
-      list[i,"enr"] = prev+1; prev = prev+1 } else {list[i,"enr"] = prev}
+      pos_count <- pos_count+1
+    } else {
+      neg_count <- neg_count+1
+    }
+    list$enr[i] <- pos_count
+    list$idx_ROC[i] <- neg_count
   }
+  
   return(list)
 }
 
