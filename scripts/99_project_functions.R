@@ -593,10 +593,10 @@ select_contrast <- function(df, auc.cutoff){
     group_by(Contrast) %>%
     drop_na(non_sig_y) %>%
     mutate(sig_thres = min(non_sig_y)) %>%
-    dplyr::select(Contrast, sig_thres, AUC, AUC_p) %>%
+    dplyr::select(Contrast, sig_thres, AUC, AUC_ROC, AUC_p, AUC_ROC_p) %>%
     distinct() %>%
     ungroup() %>%
-    mutate(include = if_else(AUC_p >= auc.cutoff, # instead of auc.cutoff*max(AUC), AUC of expected by chance
+    mutate(include = if_else(AUC_ROC_p >= auc.cutoff, 
                              "yes",
                              "no")) %>% 
     separate_wider_delim(Contrast, "_", names = c(NA, "dataset", "case", "control"),

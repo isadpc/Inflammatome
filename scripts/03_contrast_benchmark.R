@@ -40,6 +40,24 @@ pal <- colorRampPalette(c("#d7191c","#fdae61", "#80cdc1","#018571"))
 scales::show_col(pal(4))
 scales::show_col(pal(8))
 
+myPalette <- c(
+  "#1F77B4", # Blue
+  "#FF7F0E", # Orange
+  "#2CA02C", # Green
+  "#D62728", # Red
+  "#9467BD", # Purple
+  "#8C564B", # Brown
+  "#E377C2", # Pink
+  "#7F7F7F", # Grey
+  "#BCBD22", # Yellow-green
+  "#17BECF", # Teal
+  "#9B59B6", # Lavender
+  "#F39C12", # Yellow
+  "#3498DB", # Light Blue
+  "#E74C3C", # Dark Red
+  "#2ECC71"  # Light Green
+)
+
 # Benchmark --------------------------------------------------------------------
 
 ## Get filepaths ---------------------------------------------------------------
@@ -110,7 +128,7 @@ select.AUC.df <- data.frame(
 
 # produce rank agg. lists using different AUC thresholds for contrast inclusion
 #for (i in seq(0, 1, 0.1)){
-for (i in c(0.5, 0.55, 0.6, 0.7, 0.75)){ # at 0.8 no contrasts are included and going over .65 there are too few
+for (i in c(0.5, 0.55, 0.6, 0.65, 0.7, 0.75)){ # at 0.8 no contrasts are included and going over .65 there are too few
   print(i)
   # select contrasts
   selected.contrasts <- select_contrast(ranked.df, i)
@@ -158,23 +176,23 @@ select.AUC.df <- select.AUC.df %>%
   unnest(cols = c(data, AUC_p)) %>%
   ungroup()
 
-#write_tsv(select.AUC.df, "data/03_AUC_threshold_selection.tsv")
+write_tsv(select.AUC.df, "data/03_AUC_threshold_selection.tsv")
 
 # compare AUCs and diseases and tissues included
-max(select.AUC.df$AUC)
-distinct(select.AUC.df, AUC, AUC_p, auc_threshold) # highest with 0.6
-distinct(select.AUC.df, AUC, AUC_p, auc_threshold, num_contrasts, num_diseases, num_tissues) %>% drop_na()
-summary_table <- distinct(select.AUC.df, AUC, AUC_p, auc_threshold, num_contrasts, num_diseases, num_tissues) %>% drop_na()
+summary_table <- distinct(select.AUC.df, AUC, AUC_ROC, AUC_p, AUC_ROC_p, auc_threshold, num_contrasts, num_diseases, num_tissues) %>% drop_na()
+summary_table
 write_tsv(summary_table, "data/03_AUC_threshold_selection_summary.tsv")
 
 # AUC very similar, look at gene content
 ensg.55 <- select.AUC.df$ENSG.ID[select.AUC.df$auc_threshold == 0.55]
 ensg.5 <- select.AUC.df$ENSG.ID[select.AUC.df$auc_threshold == 0.5]
 ensg.6 <- select.AUC.df$ENSG.ID[select.AUC.df$auc_threshold == 0.6]
+ensg.65 <- select.AUC.df$ENSG.ID[select.AUC.df$auc_threshold == 0.65]
 
 length(intersect(ensg.55[1:2000], ensg.6[1:2000]))
 length(intersect(ensg.55[1:2000], ensg.5[1:2000]))
 length(intersect(ensg.5[1:2000], ensg.6[1:2000]))
+length(intersect(ensg.65[1:2000], ensg.6[1:2000]))
 
 # benchmark rank agg. lists
 #segment.benchmark <- data.frame(x1 = 0,
@@ -187,13 +205,10 @@ segment.benchmark <- data.frame(x1 = 0,
                                 x2 = 1,
                                 y2 = 1)
 
-# temporary
 #select.AUC.df <- read_tsv("data/03_AUC_threshold_selection.tsv")
-#select.AUC.df <- read_tsv("data/tmp/03_AUC_threshold_noUC.tsv")
-#select.AUC.df <- read_tsv("data/tmp/03_AUC_threshold_noGSE137344.tsv")
 
 select.AUC.df %>%
-  ggplot(aes(x = p_annotation, y = p_markers)) +
+  ggplot(aes(x = p_ROC, y = p_markers)) +
   geom_path(aes(color=as.factor(auc_threshold))) +
   geom_segment(aes(x = x1,
                    y = y1,
@@ -212,7 +227,7 @@ ggsave("figures/03_AUC_threshold_selection.png",
        w = 10)
 
 select.AUC.df %>%
-  ggplot(aes(x = p_annotation, y = p_markers)) +
+  ggplot(aes(x = p_ROC, y = p_markers)) +
   geom_path(aes(color=as.factor(auc_threshold))) +
   geom_segment(aes(x = x1,
                    y = y1,
@@ -228,7 +243,7 @@ select.AUC.df %>%
                      values = myPalette) +
   plotTheme +
   coord_cartesian(clip = "on",
-                  xlim = c(0, select.AUC.df$p_annotation[select.AUC.df$Position == 4000][1]),
+                  xlim = c(0, select.AUC.df$p_ROC[select.AUC.df$Position == 4000][1]),
                   ylim = c(0, select.AUC.df$p_markers[select.AUC.df$Position == 4000][1]))
 
 ggsave("figures/03_AUC_threshold_selection_zoom.png",
@@ -240,20 +255,6 @@ ggsave("figures/03_AUC_threshold_selection_zoom.png",
 # 0.6 yields highest AUC of rank agg list + includes diversity of 
 # diseases and tissues
 selected.contrasts <- select_contrast(ranked.df, .6) 
-
-selected.contrasts.original <- read_tsv("data/03_selected_contrasts.tsv")
-
-identical(selected.contrasts, selected.contrasts.original)
-identical(selected.contrasts$Contrast, selected.contrasts.original$Contrast)
-identical(selected.contrasts$include, selected.contrasts.original$include)
-identical(round(selected.contrasts$AUC_p, 2), round(selected.contrasts.original$AUC_p, 2))
-
-approxfun(ranked.df$p_annotation[ranked.df$Contrast =="01_GSE131282_MS_ctl"], ranked.df$p_markers[ranked.df$Contrast =="01_GSE131282_MS_ctl"])
-approxfun(ranked.df$p_annotation[71:18216], ranked.df$p_markers[71:18216])
-length(ranked.df$p_annotation[ranked.df$Contrast =="01_GSE131282_MS_ctl"])
-approxfun(c(1,2,2,3,4,10,40), c(20, 25, 27, 50, 55, 55, 56))
-approxfun(c(1,2,3,4,10,40), c(20, 25, 27, 50, 55,  56))
-approxfun(c(1,2,3,4,10,40), c(20, 25, 50, 55, 55, 56))
 
 selected.contrasts %>%
   filter(include=="yes") %>%
@@ -290,20 +291,17 @@ segment.benchmark <- data.frame(x1 = 0,
 
 ### Plot all contrasts together ------------------------------------------------
 tissue.p <- ranked.df %>%
-  ggplot(aes(x = idx, y = marker_count)) +
+  ggplot(aes(x = idx_ROC, y = marker_count)) +
   geom_path(aes(color = Contrast)) +
   geom_segment(aes(x = x1,
                    y = y1,
                    xend = x2,
                    yend = y2), 
                data = segment.benchmark,
-               linewidth = 2) +
+               linewidth = .5) +
   labs(y = "Number of union inflammation markers",
-       x = "DEGs sorted by stat value") +
+       x = "non-gold std DEGs sorted by stat value") +
   coord_cartesian(clip = "off") +
-  annotate(geom = "label", x = 15000,
-           y = dim( union[union$ENSG.ID %in% ENSG.IDs,])[1] - 7,
-           label = "expected by\nchance", size = 5, vjust = "inward", hjust = "outward") + 
   guides(size = "none", linetype = "none", colour = "none")+
   scale_color_manual(values = tissue.pal) +
   plotTheme 
@@ -322,56 +320,26 @@ write_tsv(ranked.df, "data/03_sorted_contrasts.tsv")
 for (set in selected.contrasts$dataset){
   p <- ranked.df %>%
     filter(str_detect(Contrast, set)) %>%
-    ggplot(aes(x = idx, y = marker_count)) +
+    ggplot(aes(x = idx_ROC, y = marker_count)) +
     geom_path(aes(color = Contrast)) +
     geom_segment(aes(x = x1,
                      y = y1,
                      xend = x2,
                      yend = y2), 
                  data = segment.benchmark,
-                 linewidth = 2) +
-    labs(y = "Number of union inflammation markers",
-         x = "DEGs sorted by stat value") +
+                 linewidth = .5) +
+    labs(y = "Number of gold standard genes",
+         x = "Non-gold standard DEGs") +
     coord_cartesian(clip = "off") +
-    annotate(geom = "label", x = length(ENSG.IDs)-1500,
-             y = dim( union[union$ENSG.ID %in% ENSG.IDs,])[1] - 7,
-             label = "expected by\nchance", size = 5, vjust = "inward", hjust = "outward") + 
     scale_color_manual(values = tissue.pal) +
     plotTheme 
-  p
+  print(p)
   
   ggsave(paste("figures/03_benchmark_", set, ".png", sep=""), 
          p,
-         width = 12,
-         height = 8)
+         width = 10,
+         height = 7)
 }
-
-### Plot example for paper -----------------------------------------------------
-ranked.df %>%
-  filter(Contrast %in% c("02_GSE166925_CD_CTLlarge", "02_GSE175759_LupusNeph_ctl", "02_GSE142530_AH_CTL", "02_GSE231693_IPF_CTL")) %>%
-  ggplot(aes(x = p_annotation, y = p_markers)) +
-  #geom_path(aes(color = Contrast, linetype = include)) +
-  geom_path(aes(color = Contrast, 
-                linetype = include)) +
-  geom_segment(aes(x = x1,
-                   y = y1,
-                   xend = x2,
-                   yend = y2), 
-               data = segment.benchmark,
-               linewidth = .5) +
-  labs(y = "Proportion of gold standard genes",
-       x = "Genes ranked by decreasing test statistic") +
-  #coord_cartesian(clip = "off") +
-  scale_color_manual(values = myPalette) +
-  scale_linetype_manual(values = c(yes="solid", no="dotted")) +  # Adjust linetypes if needed
-  #guides(
-  #  color = guide_legend(order = 1),      # Legend for color (Contrast)
-  #  linetype = guide_legend(order = 2)    # Legend for linetype (include)
-  #) +
-  plotTheme
-
-ggsave("figures/03_benchmark_example.png",
-       h=7, w=10)
 
 ### Plot per tissue ------------------------------------------------------------
 selected.contrasts %>% count(tissue)
@@ -391,23 +359,7 @@ segment.benchmark <- data.frame(x1 = 0,
                                 x2 = 1,
                                 y2 = 1)
 
-myPalette <- c(
-  "#1F77B4", # Blue
-  "#FF7F0E", # Orange
-  "#2CA02C", # Green
-  "#D62728", # Red
-  "#9467BD", # Purple
-  "#8C564B", # Brown
-  "#E377C2", # Pink
-  "#7F7F7F", # Grey
-  "#BCBD22", # Yellow-green
-  "#17BECF", # Teal
-  "#9B59B6", # Lavender
-  "#F39C12", # Yellow
-  "#3498DB", # Light Blue
-  "#E74C3C", # Dark Red
-  "#2ECC71"  # Light Green
-)
+
 
 ranked.df %>%
   filter(tissue == "skin") %>%
@@ -486,7 +438,7 @@ ranked.df %>%
  for (tiss in selected.contrasts$tissue){
   p <- ranked.df %>%
     filter(tissue == tiss) %>%
-    ggplot(aes(x = idx, y = marker_count)) +
+    ggplot(aes(x = p_ROC, y = p_markers)) +
     geom_path(aes(color = Contrast)) +
     geom_segment(aes(x = x1,
                      y = y1,
@@ -497,15 +449,40 @@ ranked.df %>%
     labs(y = "Number of union inflammation markers",
          x = "DEGs sorted by stat value") +
     coord_cartesian(clip = "off") +
-    annotate(geom = "label", x = length(ENSG.IDs)-1500,
-             y = dim( union[union$ENSG.ID %in% ENSG.IDs,])[1] - 7,
-             label = "expected by\nchance", size = 5, vjust = "inward", hjust = "outward") + 
     scale_color_manual(values = tissue.pal) +
-    plotTheme 
-  p
+    plotTheme
+  
+  print(p)
   
   ggsave(paste("figures/03_benchmark_", tiss, ".png", sep=""), 
          p,
          width = 12,
          height = 8)
-}
+ }
+
+### Plot example for paper -----------------------------------------------------
+ranked.df %>%
+  filter(Contrast %in% c("02_GSE166925_CD_CTLlarge", "02_GSE175759_LupusNeph_ctl", "02_GSE142530_AH_CTL", "02_GSE231693_IPF_CTL")) %>%
+  ggplot(aes(x = p_ROC, y = p_markers)) +
+  #geom_path(aes(color = Contrast, linetype = include)) +
+  geom_path(aes(color = Contrast, 
+                linetype = include)) +
+  geom_segment(aes(x = x1,
+                   y = y1,
+                   xend = x2,
+                   yend = y2), 
+               data = segment.benchmark,
+               linewidth = .5) +
+  labs(y = "Proportion of gold standard genes",
+       x = "Genes ranked by decreasing test statistic") +
+  #coord_cartesian(clip = "off") +
+  scale_color_manual(values = myPalette) +
+  scale_linetype_manual(values = c(yes="solid", no="dotted")) +  # Adjust linetypes if needed
+  #guides(
+  #  color = guide_legend(order = 1),      # Legend for color (Contrast)
+  #  linetype = guide_legend(order = 2)    # Legend for linetype (include)
+  #) +
+  plotTheme
+
+ggsave("figures/03_benchmark_example.png",
+       h=7, w=10)
