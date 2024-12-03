@@ -359,8 +359,6 @@ segment.benchmark <- data.frame(x1 = 0,
                                 x2 = 1,
                                 y2 = 1)
 
-
-
 ranked.df %>%
   filter(tissue == "skin") %>%
   ggplot(aes(x = p_annotation, y = p_markers)) +
