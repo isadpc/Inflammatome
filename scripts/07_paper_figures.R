@@ -112,26 +112,6 @@ selected.contrasts <- selected.contrasts %>%
 rank.contrasts <- rank.contrasts %>%
   left_join(selected.contrasts)
 
-linetype_val <- if_else(filter(selected.contrasts, tissue == "CNS")$include == "yes", "solid", "12")
-names(linetype_val) <- filter(selected.contrasts, tissue == "CNS")$new_contrast
-
-rank.contrasts %>%
-  filter(tissue == "CNS") %>%
-  ggplot(aes(x = p_annotation, y = p_markers)) +
-  geom_path(aes(color = new_contrast, linetype = new_contrast),
-            linewidth = .5) +  
-  geom_segment(aes(x = x1, y = y1, xend = x2, yend = y2), 
-               data = segment.proportion, linewidth = .5) +
-  labs(title = "CNS",
-       y = "Cumulative proportion of gold standard genes",
-       x = "Cumulative proportion of other genes",
-       color = "Contrast",
-       linetype = "Contrast") +
-  scale_color_manual(values = myPalette) +  
-  scale_linetype_manual(values = linetype_val) + 
-  guides(color = guide_legend(override.aes = list(linewidth = .9))) +
-  plotTheme
-
 selected.contrasts <- selected.contrasts %>% 
   group_by(tissue) %>%
   arrange(dataset)
@@ -143,7 +123,7 @@ plot_list <- lapply(unique(rank.contrasts$new_tissue), function(f){
   
   rank.contrasts %>%
     filter(new_tissue == f) %>%
-    ggplot(aes(x = p_annotation, y = p_markers)) +
+    ggplot(aes(x = p_ROC, y = p_markers)) +
     geom_path(aes(color = fct_reorder(new_contrast, dataset), linetype = fct_reorder(new_contrast, dataset)),
               linewidth = .5) +  
     geom_segment(aes(x = x1, y = y1, xend = x2, yend = y2), 
