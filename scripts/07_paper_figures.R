@@ -26,6 +26,26 @@ plotTheme <- theme_minimal() + theme(
   axis.line = element_line(linewidth = 0.5) # Subtle axis lines
 )
 
+# Define color palette ---------------------------------------------------------
+myPalette <- c(
+  "#1F77B4", # Blue
+  "#FF7F0E", # Orange
+  "#2CA02C", # Green
+  "#D62728", # Red
+  "#9467BD", # Purple
+  "#8C564B", # Brown
+  "#E377C2", # Pink
+  "#7F7F7F", # Grey
+  "#BCBD22", # Yellow-green
+  "#17BECF", # Teal
+  "#9B59B6", # Lavender
+  "#F39C12", # Yellow
+  "#3498DB", # Light Blue
+  "#E74C3C", # Dark Red
+  "#2ECC71"  # Light Green
+)
+
+
 # 1. Benchmarking for contrast inclusion (supplementary) -----------------------
 rank.contrasts <- read_tsv("data/03_sorted_contrasts.tsv")
 selected.contrasts <- read_tsv("data/03_selected_contrasts.tsv")
@@ -35,8 +55,117 @@ segment.proportion <- data.frame(x1 = 0,
                                  x2 = 1,
                                  y2 = 1)
 
+selected.contrasts %>% count(tissue)
+# max contrasts per tissue is 15; need a discrete palette of 15
+selected.contrasts %>% 
+  filter(include == "yes") %>% 
+  dplyr::count(tissue)
 
+## Make new contrast names -----------------------------------------------------
+selected.contrasts %>% count(dataset)
+selected.contrasts %>% distinct(case) %>% print(n=30)
+selected.contrasts %>% distinct(control) %>% print(n=30)
 
+selected.contrasts <- selected.contrasts %>%
+  mutate(new_case = case_when(case == "AD"       ~ "Aderm",
+                              case == "Contact"  ~ "Cderm",
+                              case == "Alz"      ~ "AD",
+                              case == "Cirr"     ~ "AC" , # alcohol-related cirrhosis
+                              case == "AC"       ~ "LUAD", # lung adenocarcinoma
+                              case == "DiabNeph" ~ "DN",
+                              case == "LupusNeph"~ "LN",
+                              case == "Acontact" ~ "ACderm",
+                              T ~ case),
+         new_control = case_when(control == "ctl"           ~ "Ctl",
+                                 control == "marginpaired"  ~ "paired",
+                                 control == "postpaired"    ~ "paired (post-op)",
+                                 control == "CTL"           ~ "Ctl",
+                                 control == "Old"           ~ "old age Ctls",
+                                 control == "Young"         ~ "young age Ctls",
+                                 control == "Ctlsalmon"     ~ "Ctl",
+                                 control == "pairedsalmon"  ~ "paired",
+                                 control == "MSinactive"    ~ "Inactive MS (unpaired)",
+                                 control == "CTLlarge"      ~ "Ctl (large intestine)",
+                                 control == "CTLsmall"      ~ "Ctl (small intestine)",
+                                 control == "post_treatment"~ "paired",
+                                 control == "ctlearly"      ~ "Ctl (early onset)",
+                                 control == "ctllate"       ~ "Ctl (late onset)",
+                                 control == "ILD_CTL"       ~ "Ctl",
+                                 control == "MHL"           ~ "MHL",
+                                 control == "MHO"          ~ "MHO",
+                                 T ~ control),
+         new_tissue = case_when(tissue == "CNS" ~ "Central nervous system",
+                                tissue == "skin" ~ "Skin",
+                                tissue == "intestine" ~ "Intestine",
+                                tissue == "synovium"  ~ "Synovium",
+                                tissue == "liver" ~ "Liver",
+                                tissue == "lung" ~ "Lung",
+                                tissue == "kidney" ~ "Kidney",
+                                tissue == "salivary_glands" ~ "Salivary gland",
+                                tissue == "fat" ~ "Adipose tissue",
+                                tissue == "muscle" ~ "Muscle"),
+         new_contrast = if_else(str_detect("paired", new_control),
+                                paste(new_case, new_control, dataset, sep = " "),
+                                paste(new_case, "vs.", new_control, dataset, sep = " ")))
+
+## Plot ------------------------------------------------------------------------
+rank.contrasts <- rank.contrasts %>%
+  left_join(selected.contrasts)
+
+linetype_val <- if_else(filter(selected.contrasts, tissue == "CNS")$include == "yes", "solid", "12")
+names(linetype_val) <- filter(selected.contrasts, tissue == "CNS")$new_contrast
+
+rank.contrasts %>%
+  filter(tissue == "CNS") %>%
+  ggplot(aes(x = p_annotation, y = p_markers)) +
+  geom_path(aes(color = new_contrast, linetype = new_contrast),
+            linewidth = .5) +  
+  geom_segment(aes(x = x1, y = y1, xend = x2, yend = y2), 
+               data = segment.proportion, linewidth = .5) +
+  labs(title = "CNS",
+       y = "Cumulative proportion of gold standard genes",
+       x = "Cumulative proportion of other genes",
+       color = "Contrast",
+       linetype = "Contrast") +
+  scale_color_manual(values = myPalette) +  
+  scale_linetype_manual(values = linetype_val) + 
+  guides(color = guide_legend(override.aes = list(linewidth = .9))) +
+  plotTheme
+
+selected.contrasts <- selected.contrasts %>% 
+  group_by(tissue) %>%
+  arrange(dataset)
+
+plot_list <- lapply(unique(rank.contrasts$new_tissue), function(f){
+  
+  linetype_val <- if_else(filter(selected.contrasts, new_tissue == f)$include == "yes", "solid", "12")
+  names(linetype_val) <- filter(selected.contrasts, new_tissue == f)$new_contrast
+  
+  rank.contrasts %>%
+    filter(new_tissue == f) %>%
+    ggplot(aes(x = p_annotation, y = p_markers)) +
+    geom_path(aes(color = fct_reorder(new_contrast, dataset), linetype = fct_reorder(new_contrast, dataset)),
+              linewidth = .5) +  
+    geom_segment(aes(x = x1, y = y1, xend = x2, yend = y2), 
+                 data = segment.proportion, linewidth = .5) +
+    labs(title = f,
+         y = "Cumulative proportion of gold standard genes",
+         x = "Cumulative proportion of other genes",
+         color = "Contrast",
+         linetype = "Contrast") +
+    scale_color_manual(values = myPalette) +  
+    scale_linetype_manual(values = linetype_val) + 
+    guides(color = guide_legend(override.aes = list(linewidth = .9))) +
+    plotTheme
+})
+       
+plot_grid(plotlist = plot_list,
+          nrow = 5,
+          labels = c("a", "b", "c", "d", "e",
+                     "f", "g", "h", "i", "j"))
+
+ggsave("figures/07_benchmark_per_tissue.png",
+       h=35, w=20)
 
 # 2. Benchmarking rank agg list ------------------------------------------------
 rank <- read_tsv("data/04_rank_agg_list.tsv")
