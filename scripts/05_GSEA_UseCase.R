@@ -590,6 +590,8 @@ UC.hansen$significance <- ifelse(
   "not_significant"
 )
 
+write_tsv(UC.hansen, "data/05_UC_hansen_processed.tsv")
+
 ggplot(UC.hansen, aes(x = logFC, y = -log10(adj_pvalue), color = significance, alpha = significance)) +
   geom_point(size = .3) +
   scale_color_manual(values = c(
