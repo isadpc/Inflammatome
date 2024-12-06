@@ -2,18 +2,14 @@
 rm(list = ls())
 
 # Load libraries ---------------------------------------------------------------
-library(DESeq2)
 library(tidyverse)
 library(readr)
-library(GEOquery)
-library(limma)
 library(ggrepel) 
 library(clusterProfiler)
 library(org.Hs.eg.db)
 library(enrichplot)
 library(readxl)
 library(msigdbr)
-library(umap)
 library(tidytext)
 
 # Define functions -------------------------------------------------------------
@@ -37,7 +33,7 @@ plotTheme <- theme_minimal() + theme(
   )
 
 # Read data --------------------------------------------------------------------
-all.genes <- read_tsv("data/tmp/rank_agg_list_LFC.tsv") 
+all.genes <- read_tsv("data/04_rank_agg_list.tsv") 
 
 
 # Prepare ranked lists ---------------------------------------------------------
@@ -51,22 +47,14 @@ igan <- read_tsv("data/02_GSE175759_IgAN_ctl.tsv") %>%
 MS <- read_tsv("data/02_GSE138614_MS_CTL.tsv") %>%
   filter(ENSG.ID %in% Final_Annotation_List$ENSG.ID)
 
-SS <- read_tsv("data/02_GSE154926_SS_Ctl.tsv") %>%
-  filter(ENSG.ID %in% Final_Annotation_List$ENSG.ID)
-
 ## Proteomics ------------------------------------------------------------------
 UC.hansen.pre <- read_excel("data/supp.table.processed.xlsx", sheet = "All proteins")
 UC.andersen <- read_tsv("data/raw/DE.res.UC.Andersen.tsv")  # DE by Oana, t stat
-AD.keller <- read_tsv("data/raw/DE.res.AD.Keller.tsv") # lfc or sorting val
 
 UC.andersen <- UC.andersen %>%
   rename(ENSG.ID = ensembl_gene_id,
          stat = t) %>%
   filter(ENSG.ID %in% Final_Annotation_List$ENSG.ID)
-
-AD.keller <- AD.keller %>%
-  rename(stat = sorting.value) %>%
-  inner_join(Final_Annotation_List)
 
 ### UC Hansen data processing --------------------------------------------------
 # filter proteins in over 70% samples (they do this in the paper)
@@ -219,17 +207,6 @@ all.sets <- rbind(
   reactome
 )
 
-all.sets <- all.sets %>%
-  mutate(gs = gsub(
-    "(?<=WP|GOBP|REACTOME)([A-Z\\s1]+)",
-    "\\L\\1", 
-    gsub("_", " ", gs),
-    perl = TRUE),
-    gs = gsub("inflammatory response", "inf. res.", gs),
-    gs = gsub("interleukin 1", "IL-1", gs),
-    gs = gsub("interferon", "IFN", gs),
-    gs = gsub("tnf", "TNF", gs))
-
 all.sets %>% count(gs)
 all.sets %>% count(gs) %>% 
   ggplot(aes(n)) + 
@@ -237,7 +214,7 @@ all.sets %>% count(gs) %>%
   theme_bw() +
   labs(title = "Distribution of gene set sizes")
 
-#write_tsv(all.sets, "data/05_inflammationGeneSets.tsv") # (26/11/2024)
+# write_tsv(all.sets, "data/05_inflammationGeneSets.tsv") # (06/12/2024)
 
 all.sets <- read_tsv("data/05_inflammationGeneSets.tsv")
 
@@ -359,62 +336,46 @@ gsea_AH <- run_gsea(AH, all.sets, "stat")
 p_AH <- dotplot(gsea_AH, 
                 x = "NES", 
                 size= "GeneRatio",
-                showCategory = 10) + ggtitle("Alcoholic hepatitis") 
+                showCategory = 13) + ggtitle("Alcoholic hepatitis") 
 
-dotplot(gsea_AH, 
-        x = "NES", 
-        size= "p.adjust",
-        color="NES",
-        showCategory = 20) + ggtitle("Alcoholic hepatitis") 
-
-dotplot(gsea_AH, 
-        x = "geneRatio", 
-        size= "p.adjust",
-        color="NES",
-        showCategory = 20) + ggtitle("Alcoholic hepatitis") 
 p_AH
-#ggsave("figures/05_AH_dotplot.png", 
-#       p_AH,
-#       h = 9,
-#       w = 10)
+ggsave("figures/05_AH_dotplot.png", 
+       p_AH,
+       h = 9,
+       w = 10)
 
 ## IgA nephropathy -------------------------------------------------------------
 gsea_igan <- run_gsea(igan, all.sets, "stat")
-p_igan <- dotplot(gsea_igan, x = "NES", size= "GeneRatio",showCategory = 10) + ggtitle("IgA Nephropathy")
+p_igan <- dotplot(gsea_igan, x = "NES", size= "GeneRatio",showCategory = 13) + ggtitle("IgA Nephropathy")
 p_igan
-#ggsave("figures/05_igan_dotplot.png", 
-#       p_igan,
-#       h = 9,
-#       w = 10)
-#
+ggsave("figures/05_igan_dotplot.png", 
+       p_igan,
+       h = 9,
+       w = 10)
+
 ## Multiple sclerosis ----------------------------------------------------------
 gsea_MS <- run_gsea(MS, all.sets, "stat")
-p_MS <- dotplot(gsea_MS, x = "NES", size= "GeneRatio",showCategory = 10) + ggtitle("Multiple sclerosis") 
+p_MS <- dotplot(gsea_MS, x = "NES", size= "GeneRatio",showCategory = 13) + ggtitle("Multiple sclerosis") 
 p_MS
-#ggsave("figures/05_MS_dotplot.png", 
-#       p_MS,
-#       h = 9,
-#       w = 10)
-
-## Sjorgen syndrome ------------------------------------------------------------
-gsea_SS <- run_gsea(SS, all.sets, "stat")
-p_SS <- dotplot(gsea_SS, x = "NES", size= "GeneRatio",showCategory = 10) + ggtitle("") 
-p_SS
+ggsave("figures/05_MS_dotplot.png", 
+       p_MS,
+       h = 9,
+       w = 10)
 
 ## UC Hansen -------------------------------------------------------------------
 UC.hansen <- UC.hansen %>% drop_na(stat)
 gsea_UC.hansen <- run_gsea(UC.hansen, all.sets, "stat")
-p_hansen <- dotplot(gsea_UC.hansen, x = "NES", size= "GeneRatio",showCategory = 10) + ggtitle("UC Hansen sorting value") 
+p_hansen <- dotplot(gsea_UC.hansen, x = "NES", size= "GeneRatio",showCategory = 13) + ggtitle("UC Hansen sorting value") 
 p_hansen
 
 gsea_UC.hansen.lfc <- run_gsea(UC.hansen, all.sets, "logFC")
-dotplot(gsea_UC.hansen.lfc, x = "NES", size= "GeneRatio",showCategory = 10) + ggtitle("UC Hansen LFC") 
+dotplot(gsea_UC.hansen.lfc, x = "NES", size= "GeneRatio",showCategory = 13) + ggtitle("UC Hansen LFC") 
 # super similar
 
-#ggsave("figures/05_UC_hansen_dotplot.png", 
-#       p_hansen,
-#       h = 9,
-#       w = 10)
+ggsave("figures/05_UC_hansen_dotplot.png", 
+       p_hansen,
+       h = 9,
+       w = 10)
 
 ## UC Andersen -----------------------------------------------------------------
 UC.andersen <- UC.andersen %>% 
@@ -422,40 +383,16 @@ UC.andersen <- UC.andersen %>%
   filter (P.Value == min(P.Value))
 
 gsea_UC.andersen <- run_gsea(UC.andersen, all.sets, "stat")
-p_andersen <- dotplot(gsea_UC.andersen, x = "NES", size= "GeneRatio",showCategory = 10) + ggtitle("UC Andersen stat value") 
+p_andersen <- dotplot(gsea_UC.andersen, x = "NES", size= "GeneRatio",showCategory = 13) + ggtitle("UC Andersen stat value") 
 p_andersen
 
 gsea_UC.andersen.lfc <- run_gsea(UC.andersen, all.sets, "logFC")
-dotplot(gsea_UC.andersen.lfc, x = "NES", size= "GeneRatio",showCategory = 10) + ggtitle("UC Andersen LFC") 
+dotplot(gsea_UC.andersen.lfc, x = "NES", size= "GeneRatio",showCategory = 13) + ggtitle("UC Andersen LFC") 
 
-#ggsave("figures/05_UC_andersen_dotplot.png", 
-#       p_andersen,
-#       h = 9,
-#       w = 10)
-
-## AD Keller -------------------------------------------------------------------
-gsea_AD.keller <- run_gsea(AD.keller, all.sets, "stat")
-p_keller <- dotplot(gsea_AD.keller, x = "NES", size= "GeneRatio",showCategory = 100) + ggtitle("AD Keller sorting value") 
-p_keller
-
-gsea_AD.keller.lfc <- run_gsea(AD.keller, all.sets, "logFC")
-dotplot(gsea_AD.keller.lfc, x = "NES", size= "GeneRatio",showCategory = 10) + ggtitle("AD Keller LFC") 
-
-#ggsave("figures/05_AD_keller_dotplot.png", 
-#       p_keller,
-#       h = 9,
-#       w = 10)
-
-## Rheumatoid arthritis -------------------------------------------------------------
-gsea_RA <- run_gsea(RA, all.sets, "stat")
-p_RA <- dotplot(gsea_RA, x = "NES", size= "GeneRatio",showCategory = 10) + ggtitle("RA")
-p_RA
-
-## Osteoarthritis -------------------------------------------------------------
-gsea_OA <- run_gsea(OA, all.sets, "stat")
-p_OA <- dotplot(gsea_OA, x = "NES", size= "GeneRatio",showCategory = 10) + ggtitle("OA")
-p_OA
-
+ggsave("figures/05_UC_andersen_dotplot.png", 
+       p_andersen,
+       h = 9,
+       w = 10)
 
 ## Table with all results ------------------------------------------------------
 gsea_AH.res <- gsea_AH@result %>% mutate(dataset = "AH")
@@ -463,22 +400,12 @@ gsea_igan.res <- gsea_igan@result %>% mutate(dataset = "igan")
 gsea_MS.res <- gsea_MS@result %>% mutate(dataset = "MS")
 gsea_UC.hansen.res <- gsea_UC.hansen@result %>% mutate(dataset = "UC.hansen")
 gsea_UC.andersen.res <- gsea_UC.andersen@result %>% mutate(dataset = "UC.andersen")
-gsea_AD.keller.res <- gsea_AD.keller@result %>% mutate(dataset = "AD.keller")
-gsea_RA.res <- gsea_RA@result %>% mutate(dataset = "RA")
-gsea_OA.res <- gsea_OA@result %>% mutate(dataset = "OA")
-gsea_SS.res <- gsea_SS@result %>% mutate(dataset = "SS")
 
 results <- rbind(gsea_AH.res,
                  gsea_igan.res,
                  gsea_MS.res,
                  gsea_UC.hansen.res,
-                 gsea_UC.andersen.res,
-                 gsea_AD.keller.res,
-                 #gsea_RA.res,
-                 #gsea_OA.res,
-                 gsea_SS.res)
-
-write_tsv(results, "data/05_GSEA_results.tsv")
+                 gsea_UC.andersen.res)
 
 # making contrast names nice for paper
 results <- results %>%
@@ -486,11 +413,12 @@ results <- results %>%
                                  dataset == "igan" ~ "IgAN (Park et al.)",
                                  dataset == "MS" ~ "MS (Elkjaer et al.)",
                                  dataset == "UC.hansen" ~ "UC (Schniers et al.)",
-                                 dataset == "UC.andersen" ~ "UC (Andersen et al.)"),
-         Description = if_else(Description == "top100", "Core inflammatome", Description))
+                                 dataset == "UC.andersen" ~ "UC (Bennike et al.)"),
+         Description = if_else(Description == "top100", "Inflammation signature", Description))
+
+#write_tsv(results, "data/05_GSEA_results.tsv")
 
 results %>%
-  filter(!(dataset %in% c("AD.keller", "SS", "OA", "RA"))) %>%
   ggplot(aes(x = reorder(dataset_lab,desc(-log10(p.adjust))), y = reorder(Description,-log10(p.adjust)))) + 
   scale_size_continuous(range = c(1, 15)) +
   geom_point(aes(fill = NES, size = -log10(p.adjust)), shape = 21, colour = "black",alpha = 0.7) +
@@ -510,35 +438,19 @@ ggsave("figures/05_GSEA_results_summary.png",
 
 
 results %>% 
-  filter(!(dataset %in% c("AD.keller", "SS", "OA", "RA")), NES>0) %>%
+  filter(NES>0) %>%
   group_by(dataset) %>%
   summarise(NES =max(NES)) %>%
   left_join(results)
 
 results %>% 
-  filter(!(dataset %in% c("AD.keller", "SS", "OA", "RA")), NES>0) %>%
+  filter(NES>0) %>%
   group_by(dataset) %>%
   summarise(p.adjust = min(p.adjust)) %>%
   left_join(results)
 
 
-
-results %>%
-  filter(!(dataset %in% c("AD.keller", "SS", "OA", "RA"))) %>%
-  ggplot(aes(x = dataset, y = reorder(Description,NES))) + 
-  scale_size_continuous(range = c(1, 15)) +
-  geom_point(aes(fill = NES, size = -log10(p.adjust)), shape = 21, colour = "black",alpha = 0.7) +
-  geom_point(aes(x = dataset,
-                 y = reorder(Description,NES)),
-             filter(results, p.adjust<0.05, !(dataset %in% c("AD.keller", "SS", "OA", "RA"))),
-             size = .7) +
-  theme_light(base_size = 12) +
-  scale_fill_gradient2(midpoint = 0, low = "blue",mid = "white", high = "red4", space = "Lab") +
-  scale_x_discrete(guide = guide_axis(angle = 60)) +
-  #theme(axis.text = element_text(size = 9,face="bold")) +
-  ylab(NULL) + xlab(NULL) 
-
-# combined dotplot
+# Combined dotplot
 results <- results %>%
   dplyr::rowwise() %>%
   mutate(
@@ -550,202 +462,6 @@ results <- results %>%
   ungroup() #%>%
   #filter(dataset != "AD.keller")
 
-
-dotplot_comb <- results %>%
-  filter(p.adjust < 0.05, !(dataset %in% c("AD.keller", "SS"))) %>%
-  ggplot(aes(x = NES, y = reorder_within(ID, NES, dataset))) +
-  geom_point(aes(size = geneRatio, color = log_p_adj)) + # Size and color by -log10(p)
-  scale_color_gradient(low = "blue", high = "red") + # Color gradient
-  #scale_size_continuous(range = c(.5, 10)) + # Adjust dot size range
-  facet_wrap(~ dataset, nrow = 9, scales = "free_y") +
-  scale_y_reordered() +
-  labs(
-    title = "GSEA Results Across Datasets",
-    x = "Normalized Enrichment Score (NES)",
-    y = "Gene Set",
-    color = expression(-log[10](p.adj)),
-    size = "Gene Ratio"
-  ) +
-  theme_minimal() +
-  theme(
-    strip.text = element_text(size = 12, face = "bold"), # Facet labels
-    axis.text.y = element_text(size = 6), # Pathway labels
-    axis.text.x = element_text(size = 10), # NES labels
-    axis.title = element_text(size = 12),
-    plot.title = element_text(hjust = 0.5, size = 14, face = "bold")
-  )
-
-dotplot_comb
-ggsave("figures/05_dotplot_combined_1.png",
-       dotplot_comb,
-       bg = "white",
-       h=14,
-       w=12)
-
-
-results %>%
-  filter(p.adjust < 0.05, !(dataset %in% c("AD.keller", "SS"))) %>%
-  ggplot(aes(x = NES, y = reorder_within(ID, NES, dataset))) +
-  geom_point(aes(size = log_p_adj, color = geneRatio)) + # Size and color by -log10(p)
-  scale_color_gradient(low = "antiquewhite", high = "forestgreen") + # Color gradient
-  scale_size_continuous(range = c(.7, 10)) + # Adjust dot size range
-  facet_wrap(~ dataset, nrow = 7, scales = "free_y") +
-  scale_y_reordered() +
-  labs(
-    title = "GSEA Results Across Datasets",
-    x = "Normalized Enrichment Score (NES)",
-    y = "Gene Set",
-    color = "Gene Ratio",
-    size = expression(-log[10](p.adj))
-  ) +
-  theme_minimal() +
-  theme(
-    strip.text = element_text(size = 12, face = "bold"), # Facet labels
-    axis.text.y = element_text(size = 6), # Pathway labels
-    axis.text.x = element_text(size = 10), # NES labels
-    axis.title = element_text(size = 12),
-    plot.title = element_text(hjust = 0.5, size = 14, face = "bold")
-  )
-
-ggsave("figures/05_dotplot_combined_2.png",
-       bg = "white",
-       h=14,
-       w=12)
-
-results %>%
-  filter(p.adjust < 0.05, !(dataset %in% c("AD.keller", "SS"))) %>%
-  ggplot(aes(x = NES, y = reorder_within(ID, NES, dataset))) +
-  geom_point(aes(size = geneRatio, color = log_p_adj)) + # Size and color by -log10(p)
-  scale_color_gradient(low = "antiquewhite", high = "forestgreen") + # Color gradient
-  #scale_size_continuous(range = c(.7, 10)) + # Adjust dot size range
-  facet_wrap(~ dataset, nrow = 7, scales = "free_y") +
-  scale_y_reordered() +
-  labs(
-    title = "GSEA Results Across Datasets",
-    x = "Normalized Enrichment Score (NES)",
-    y = "Gene Set",
-    color = expression(-log[10](p.adj)),
-    size = "Gene Ratio"
-  ) +
-  theme_minimal() +
-  theme(
-    strip.text = element_text(size = 12, face = "bold"), # Facet labels
-    axis.text.y = element_text(size = 6), # Pathway labels
-    axis.text.x = element_text(size = 10), # NES labels
-    axis.title = element_text(size = 12),
-    plot.title = element_text(hjust = 0.5, size = 14, face = "bold")
-  )
-
-ggsave("figures/05_dotplot_combined_3.png",
-       bg = "white",
-       h=14,
-       w=12)
-
-results %>%
-  filter(p.adjust < 0.05, !(dataset %in% c("AD.keller", "SS"))) %>%
-  ggplot(aes(x = NES, y = reorder_within(ID, NES, dataset))) +
-  geom_point(aes(size = geneRatio, color = p.adjust)) + # Size and color by -log10(p)
-  scale_color_gradient(low = "forestgreen", high = "antiquewhite") + # Color gradient
-  #scale_size_continuous(range = c(.7, 10)) + # Adjust dot size range
-  facet_wrap(~ dataset, nrow = 7, scales = "free_y") +
-  scale_y_reordered() +
-  labs(
-    title = "GSEA Results Across Datasets",
-    x = "Normalized Enrichment Score (NES)",
-    y = "Gene Set",
-    color = "Adjusted p-Value",
-    size = "Gene Ratio"
-  ) +
-  theme_minimal() +
-  theme(
-    strip.text = element_text(size = 12, face = "bold"), # Facet labels
-    axis.text.y = element_text(size = 6), # Pathway labels
-    axis.text.x = element_text(size = 10), # NES labels
-    axis.title = element_text(size = 12),
-    plot.title = element_text(hjust = 0.5, size = 14, face = "bold")
-  )
-
-
-results %>%
-  filter(p.adjust < 0.05, !(dataset %in% c("AD.keller", "SS"))) %>%
-  ggplot(aes(x = NES, y = reorder_within(ID, NES, dataset))) +
-  geom_point(aes(size = geneRatio, color = p.adjust)) + # Size and color by -log10(p)
-  #scale_color_gradient2(low = "forestgreen", mid = "palegreen4", high = "antiquewhite") + # Color gradient
-  #scale_color_gradientn(
-  #  colors = c("darkgreen", "forestgreen", "gold"),
-  #  values = scales::rescale(c(0, 2, 5, 10)), # Compress lower values into finer steps
-  #  name = "Adjusted p-Value") +
-  scale_color_viridis_c(
-    direction = 1,
-    option = "magma", # Or "viridis", "magma", etc.
-    #trans = "sqrt",    # Use a square root transformation to emphasize smaller values
-    name = "Adjusted p-Value"
-  ) +
-  scale_size_continuous(range = c(1, 8)) + # Adjust dot size range
-  facet_wrap(~ dataset, nrow = 7, scales = "free_y") +
-  scale_y_reordered() +
-  labs(
-    title = "GSEA Results Across Datasets",
-    x = "Normalized Enrichment Score (NES)",
-    y = "Gene Set",
-    #color = "Adjusted p-Value",
-    size = "Gene Ratio"
-  ) +
-  theme_minimal() +
-  theme(
-    strip.text = element_text(size = 12, face = "bold"), # Facet labels
-    axis.text.y = element_text(size = 6), # Pathway labels
-    axis.text.x = element_text(size = 10), # NES labels
-    axis.title = element_text(size = 12),
-    plot.title = element_text(hjust = 0.5, size = 14, face = "bold")
-  )
-
-ggsave("figures/05_dotplot_combined_4.png",
-       bg = "white",
-       h=14,
-       w=12)
-
-results %>%
-  filter(p.adjust < 0.05, !(dataset %in% c("AD.keller", "SS"))) %>%
-  ggplot(aes(x = NES, y = reorder_within(ID, NES, dataset))) +
-  geom_point(aes(size = geneRatio, color = log_p_adj)) + # Size and color by -log10(p)
-  scale_size_continuous(range = c(1, 8)) + # Adjust dot size range
-  #scale_color_gradientn(
-  #  colors = c("gold", "yellowgreen","forestgreen","darkgreen"), # Add intermediate colors
-  #  #values = c(0, 0.33, 0.67, 1), # Map colors to gradient stops (normalized to [0,1])
-  #  name = expression(-log[10](p.adj)) # Label for legend
-  #) +
-  #scale_color_viridis_c(
-  #  option = "magma", # Or "viridis", "magma", etc.
-  #  #trans = "sqrt",    # Use a square root transformation to emphasize smaller values
-  #  name = expression(-log[10](p.adj))
-  #) +
-  scale_color_gradientn(
-    colors = c("gold", "forestgreen", "darkgreen", "black"),
-    #values = scales::rescale(c(0, 2, 5, 10)), # Compress lower values into finer steps
-    name = expression(-log[10](p.adj))
-  )+
-  facet_wrap(~ dataset, nrow = 7, scales = "free_y") +
-  scale_y_reordered() +
-  labs(
-    title = "GSEA Results Across Datasets",
-    x = "Normalized Enrichment Score (NES)",
-    y = "Gene Set",
-    size = "Gene Ratio"
-  ) +
-  theme_minimal() +
-  theme(
-    strip.text = element_text(size = 12, face = "bold"), # Facet labels
-    axis.text.y = element_text(size = 10), # Pathway labels
-    axis.text.x = element_text(size = 10), # NES labels
-    axis.title = element_text(size = 12),
-    plot.title = element_text(hjust = 0.5, size = 14, face = "bold")
-  )
-
-ggsave("figures/05_dotplot_combined_8.png",
-       bg = "white",
-       h=14,
-       w=12)
 
 results %>%
   #filter(p.adjust < 0.05, !(dataset %in% c("AD.keller", "SS"))) %>%
@@ -772,7 +488,7 @@ results %>%
   #  #values = scales::rescale(c(0, 2, 5, 10)), # Compress lower values into finer steps
   #  name = expression(-log[10](p.adj))
   #)+
-  facet_wrap(~ dataset, nrow = 4, scales = "free_y") +
+  facet_wrap(~ dataset, nrow = 5, scales = "free_y") +
   scale_y_reordered() +
   labs(
     #title = "GSEA Results Across Datasets",
@@ -793,157 +509,6 @@ ggsave("figures/05_dotplot_combined_allsets.png",
        bg = "white",
        h=15,
        w=22)
-
-results %>%
-  #filter(p.adjust < 0.05, !(dataset %in% c("AD.keller", "SS"))) %>%
-  group_by(dataset) %>% # Group by dataset for faceting
-  slice_min(order_by = p.adjust, n = 5) %>% # Select the top 5 significant gene sets (smallest p.adjust)
-  ungroup() %>%
-  filter(!(dataset %in% c("AD.keller", "SS"))) %>%
-  ggplot(aes(x = NES, y = reorder_within(ID, NES, dataset))) +
-  geom_point(aes(size = geneRatio, color = p.adjust)) + # Size and color by -log10(p)
-  scale_size_continuous(range = c(1, 8)) + # Adjust dot size range
-  scale_color_viridis_c(
-    direction = 1,
-    option = "inferno", # Or "viridis", "magma", etc.
-    #trans = "sqrt",    # Use a square root transformation to emphasize smaller values
-    name = "Adjusted p-Value"
-  ) +
-  facet_wrap(~ dataset, nrow = 4, scales = "free_y") +
-  scale_y_reordered() +
-  labs(
-    x = "Normalized Enrichment Score (NES)",
-    y = "Gene Set",
-    size = "Gene Ratio"
-  ) +
-  theme_minimal() +
-  theme(
-    strip.text = element_text(size = 12, face = "bold"), # Facet labels
-    axis.text.y = element_text(size = 10), # Pathway labels
-    axis.text.x = element_text(size = 10), # NES labels
-    axis.title = element_text(size = 12),
-    plot.title = element_text(hjust = 0.5, size = 14, face = "bold")
-  )
-
-# just doesnt look good with the p val
-
-results %>%
-  #filter(p.adjust < 0.05, !(dataset %in% c("AD.keller", "SS"))) %>%
-  group_by(dataset) %>% # Group by dataset for faceting
-  slice_min(order_by = p.adjust, n = 5) %>% # Select the top 5 significant gene sets (smallest p.adjust)
-  ungroup() %>%
-  filter(!(dataset %in% c("AD.keller", "SS"))) %>%
-  ggplot(aes(x = geneRatio, y = reorder_within(ID, geneRatio, dataset))) +
-  geom_point(aes(size = log_p_adj , color = NES)) + # Size and color by -log10(p)
-  scale_size_continuous(range = c(1, 8)) + # Adjust dot size range
-  scale_color_viridis_c(
-    direction = -1,
-    option = "inferno", # Or "viridis", "magma", etc.
-    #trans = "sqrt",    # Use a square root transformation to emphasize smaller values
-    name = "Normalized Enrichment Score (NES)"
-  ) +
-  facet_wrap(~ dataset, nrow = 4, scales = "free_y") +
-  scale_y_reordered() +
-  labs(
-    x = "Gene Ratio",
-    y = "Gene Set",
-    size = "log(adjusted p-value)"
-  ) +
-  theme_minimal() +
-  theme(
-    strip.text = element_text(size = 12, face = "bold"), # Facet labels
-    axis.text.y = element_text(size = 10), # Pathway labels
-    axis.text.x = element_text(size = 10), # NES labels
-    axis.title = element_text(size = 12),
-    plot.title = element_text(hjust = 0.5, size = 14, face = "bold")
-  )
-
-results %>%
-  filter(p.adjust < 0.05, !(dataset %in% c("AD.keller", "SS"))) %>%
-  ggplot(aes(x = NES, y = reorder_within(ID, NES, dataset))) +
-  geom_point(aes(size = log_p_adj, color = geneRatio)) + 
-  scale_size_continuous(range = c(1, 8)) + # Adjust dot size range
-  #scale_color_gradientn(
-  #  colors = c("gold", "yellowgreen","forestgreen","darkgreen"), # Add intermediate colors
-  #  #values = c(0, 0.33, 0.67, 1), # Map colors to gradient stops (normalized to [0,1])
-  #  name = expression(-log[10](p.adj)) # Label for legend
-  #) +
-  scale_color_viridis_c(
-    direction = -1,
-    option = "inferno", # Or "viridis", "magma", etc.
-    #trans = "sqrt",    # Use a square root transformation to emphasize smaller values
-    name = "Gene Ratio"
-  ) +
-  #scale_color_gradientn(
-  #  colors = c("gold", "forestgreen", "darkgreen", "black"),
-  #  #values = scales::rescale(c(0, 2, 5, 10)), # Compress lower values into finer steps
-  #  name = expression(-log[10](p.adj))
-  #)+
-  facet_wrap(~ dataset, nrow = 4, scales = "free_y") +
-  scale_y_reordered() +
-  labs(
-    #title = "GSEA Results Across Datasets",
-    x = "Normalized Enrichment Score (NES)",
-    y = "Gene Set",
-    size = expression(-log[10](p.adj))
-  ) +
-  theme_minimal() +
-  theme(
-    strip.text = element_text(size = 12, face = "bold"), # Facet labels
-    axis.text.y = element_text(size = 10), # Pathway labels
-    axis.text.x = element_text(size = 10), # NES labels
-    axis.title = element_text(size = 12),
-    plot.title = element_text(hjust = 0.5, size = 14, face = "bold")
-  )
-
-ggsave("figures/05_dotplot_combined_10.png",
-       bg = "white",
-       h=10,
-       w=22)
-
-results %>%
-  filter(!(dataset %in% c("AD.keller", "SS"))) %>%
-  ggplot(aes(x = NES, y =ID)) +
-  coord_flip() +
-  geom_point(aes(size = log_p_adj, color = geneRatio), position = position_dodge(width = 10)) + 
-  scale_size_continuous(range = c(1, 8)) + # Adjust dot size range
-  #scale_color_gradientn(
-  #  colors = c("gold", "yellowgreen","forestgreen","darkgreen"), # Add intermediate colors
-  #  #values = c(0, 0.33, 0.67, 1), # Map colors to gradient stops (normalized to [0,1])
-  #  name = expression(-log[10](p.adj)) # Label for legend
-  #) +
-  scale_color_viridis_c(
-    direction = -1,
-    option = "inferno", # Or "viridis", "magma", etc.
-    #trans = "sqrt",    # Use a square root transformation to emphasize smaller values
-    name = "Gene Ratio"
-  ) +
-  #scale_color_gradientn(
-  #  colors = c("gold", "forestgreen", "darkgreen", "black"),
-  #  #values = scales::rescale(c(0, 2, 5, 10)), # Compress lower values into finer steps
-  #  name = expression(-log[10](p.adj))
-  #)+
-  #facet_wrap(~ ID, nrow = 7, scales = "free_y") +
-  #scale_y_reordered() +
-  labs(
-    #title = "GSEA Results Across Datasets",
-    x = "Normalized Enrichment Score (NES)",
-    y = "Dataset",
-    size = expression(-log[10](p.adj))
-  ) +
-  theme_minimal() +
-  theme(
-    strip.text = element_text(size = 12, face = "bold"), # Facet labels
-    axis.text.y = element_text(size = 10), # Pathway labels
-    axis.text.x = element_text(size = 10), # NES labels
-    axis.title = element_text(size = 12),
-    plot.title = element_text(hjust = 0.5, size = 14, face = "bold")
-  )
-
-results %>%
-  filter(p.adjust < 0.05, !(dataset %in% c("AD.keller", "SS"))) %>%
-  ggplot(aes(log_p_adj)) +
-  geom_histogram()
 
 # Volcano plots ----------------------------------------------------------------
 ## IgA neph --------------------------------------------------------------------
@@ -982,46 +547,6 @@ UC.andersen <- UC.andersen %>%
     x = "Log Fold Change",
     y = "-log10(P-Value)",
     title = "UC Andersen"
-  ) +
-  theme_minimal()
-
-## Osteoarthritis --------------------------------------------------------------
-OA <- OA %>%
-  arrange(desc(stat)) %>%
-  mutate(idx = 1:length(stat),
-         case = "OA") %>%
-  mutate(top_2000 = if_else(ENSG.ID %in% filter(all.genes, Position <= 2000)$ENSG.ID, "yes", "no"),
-         top_100 = if_else(ENSG.ID %in% filter(all.genes, Position <= 100)$ENSG.ID, "yes", "no"))
-
-ggplot(OA, aes(x = logFC, y = -log10(P.Value), color = top_2000, alpha = top_2000)) +
-#ggplot(OA, aes(x = logFC, y = -log10(adj.P.Val), color = top_2000, alpha = top_2000)) +
-  geom_point(size = .3) +
-  scale_color_manual(values = c("no" = "grey", "yes" = "red")) +
-  scale_alpha_manual(values = c("no" = 0.2, "yes" = 1)) +
-  labs(
-    x = "Log Fold Change",
-    y = "-log10(P-Value)",
-    title = "Osteoarthritis"
-  ) +
-  theme_minimal()
-
-## Rheumathoid arthritis ---------------------------------------------------------
-RA <- RA %>%
-  arrange(desc(stat)) %>%
-  mutate(idx = 1:length(stat),
-         case = "RA") %>%
-  mutate(top_2000 = if_else(ENSG.ID %in% filter(all.genes, Position <= 2000)$ENSG.ID, "yes", "no"),
-         top_100 = if_else(ENSG.ID %in% filter(all.genes, Position <= 100)$ENSG.ID, "yes", "no"))
-
-ggplot(RA, aes(x = logFC, y = -log10(P.Value), color = top_2000, alpha = top_2000)) +
-#ggplot(RA, aes(x = logFC, y = -log10(adj.P.Val), color = top_2000, alpha = top_2000)) +
-  geom_point(size = .3) +
-  scale_color_manual(values = c("no" = "black", "yes" = "red")) +
-  scale_alpha_manual(values = c("no" = 0.2, "yes" = 1)) +
-  labs(
-    x = "Log Fold Change",
-    y = "-log10(P-Value)",
-    title = "Rheumatoid arthritis"
   ) +
   theme_minimal()
 
@@ -1127,9 +652,7 @@ test <- rbind(dplyr::select(igan, ENSG.ID, stat, top_2000, top_100, case),
               dplyr::select(UC.andersen, ENSG.ID, stat,top_2000, top_100, case),
               dplyr::select(AH, ENSG.ID, stat, top_2000, top_100, case),
               dplyr::select(MS, ENSG.ID, stat, top_2000, top_100, case),
-              dplyr::select(UC.hansen, ENSG.ID, stat, top_2000, top_100, case),
-              dplyr::select(RA, ENSG.ID, stat, top_2000, top_100, case),
-              dplyr::select(OA, ENSG.ID, stat, top_2000, top_100, case))
+              dplyr::select(UC.hansen, ENSG.ID, stat, top_2000, top_100, case))
 
 test %>%
   filter(case != "UC.hansen") %>%
