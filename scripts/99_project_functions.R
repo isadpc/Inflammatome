@@ -12,7 +12,7 @@ length(intersect(Inflamm_Top100_marker$ENSG.ID, Final_Annotation_List$ENSG.ID))
 
 STRING_ENSP_to_ENSG <- read_tsv( "data/human.aliases.filtered.txt",
                                  col_names = c("SPLIT", "ENSG.ID", "data.type")) %>% 
-  separate("SPLIT", c("tax", "ENSP.ID")) %>%
+  separate_wider_delim(SPLIT, ".", names = c("tax", "ENSP.ID")) %>%
   dplyr::select(-c(tax, data.type)) 
 
 ## msigdb inflammation markers -------------------------------------------------
