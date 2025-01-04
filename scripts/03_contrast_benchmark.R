@@ -65,15 +65,6 @@ files.tissue <- list.files(path = "data",
                            pattern = "01_GSE|02_GSE",
                            full.names = T)
 
-# try removing "data/02_GSE137344_UC_CTL.tsv" "data/02_GSE137344_CD_CTL.tsv"
-#cond = !(files.tissue == "data/02_GSE137344_UC_CTL.tsv" | files.tissue == "data/02_GSE137344_CD_CTL.tsv")
-#files.tissue[cond]
-#files.tissue <- files.tissue[cond]
-#
-## remove only UC
-#cond = !(files.tissue == "data/02_GSE137344_UC_CTL.tsv")
-#files.tissue[cond]
-#files.tissue <- files.tissue[cond]
 
 ## Get overlapping genes  ------------------------------------------------------
 # this is only necessary if you want to work with intersect genes between all
@@ -258,7 +249,7 @@ selected.contrasts <- select_contrast(ranked.df, .6)
 
 selected.contrasts %>%
   filter(include=="yes") %>%
-  count(case, tissue) %>% 
+  dplyr::count(case, tissue) %>% 
   arrange(desc(n))
 
 selected.contrasts %>%
@@ -312,8 +303,8 @@ ggsave("figures/03_benchmark_allContrasts.png",
        tissue.p,
        height = 7, width = 10)
 
-write_tsv(ranked.df, "data/03_sorted_contrasts.tsv")
-#df <- read_tsv("data/03_sorted_contrasts.tsv")
+write_tsv(ranked.df, gzfile("data/03_sorted_contrasts.tsv.gz"))
+# ranked.df <- read.delim(gzfile("data/03_sorted_contrasts.tsv.gz"))
 
 
 ### Plot each dataset separately -----------------------------------------------
@@ -458,7 +449,7 @@ ranked.df %>%
          height = 8)
  }
 
-### Plot example for paper -----------------------------------------------------
+### Plot example ---------------------------------------------------------------
 ranked.df %>%
   filter(Contrast %in% c("02_GSE166925_CD_CTLlarge", "02_GSE175759_LupusNeph_ctl", "02_GSE142530_AH_CTL", "02_GSE231693_IPF_CTL")) %>%
   ggplot(aes(x = p_ROC, y = p_markers)) +
