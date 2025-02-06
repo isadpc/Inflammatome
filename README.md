@@ -1,6 +1,6 @@
 # Inflammatome Analysis Codebase
 
-This repository contains the R code, data, and scripts for reproducing the analyses described in the paper **"[Your Paper Title Here]"**. The repository is organized to allow seamless execution of all analyses, from data preprocessing to figure generation.
+This repository contains the R code, data, and scripts for reproducing the analyses described in the paper **"The inflammatome: a meta-analysis of human genes regulated during inflammation"**. The repository is organized to allow seamless execution of all analyses, from data preprocessing to figure generation.
 
 ---
 
