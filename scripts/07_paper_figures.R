@@ -5,6 +5,7 @@ rm(list = ls())
 library(tidyverse)
 library(cowplot)
 library(readr)
+library(ComplexUpset)
 
 # Define functions -------------------------------------------------------------
 source(file = "scripts/99_project_functions.R")
@@ -270,6 +271,30 @@ GSEA.res <- GSEA.res %>%
     Description == "GOBP_CHRONIC_INFLAMMATORY_RESPONSE" ~ "GOBP: Chronic inflammatory response",                                 
     Description == "WP_CYTOKINES_AND_INFLAMMATORY_RESPONSE" ~ "WP: Cytokines and inflammatory response"))
 
+
+### UpSet plot -----------------------------------------------------------------
+all.sets <- read_tsv("data/05_inflammationGeneSets.tsv")
+
+all.sets <- all.sets %>% 
+  left_join(distinct(dplyr::select(GSEA.res, ID, Description)), 
+            by = join_by(gs == ID)) %>%
+  dplyr::select(gene, Description)
+
+# Convert TERM2GENE to a binary presence/absence matrix
+binary_matrix <- all.sets %>%
+  pivot_wider(names_from = Description, values_from = Description, values_fn = length, values_fill = 0) %>%
+  mutate(across(where(is.numeric), ~ ifelse(. > 0, 1, 0))) %>%
+  column_to_rownames("gene")
+
+ComplexUpset::upset(
+  as.data.frame(binary_matrix),
+  intersect = colnames(binary_matrix), # Use gene sets as intersections
+  width_ratio = 0.2,
+  min_size = 2)
+
+ggsave("figures/07_UpSet_geneSets.png", w = 15, h=11)
+
+### Dotplot --------------------------------------------------------------------
 
 gsea_plot <- GSEA.res %>%
   ggplot(aes(x = reorder(dataset_lab,-log10(p.adjust), decreasing = T), y = reorder(Description,-log10(p.adjust)))) + 
