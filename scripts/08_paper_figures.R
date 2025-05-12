@@ -172,7 +172,7 @@ plot_grid(plotlist = plot_list,
           label_size = 24,
           align = "v")
 
-ggsave("figures/07_benchmark_per_tissue.png",
+ggsave("figures/08_benchmark_per_tissue.png",
        h=40, w=30)
 
 
@@ -245,13 +245,13 @@ rank.fig <- plot_grid(rank.p, rank.zoom,
 
 rank.fig
 
-ggsave("figures/07_rank_agg_benchmark.png",
+ggsave("figures/08_rank_agg_benchmark.png",
        rank.fig,
        h=7,
        w=18)
 
 # 3. GSEA results --------------------------------------------------------------
-GSEA.res <- read_tsv("data/05_GSEA_results.tsv")
+GSEA.res <- read_tsv("data/06_GSEA_results.tsv")
 
 GSEA.res %>% distinct(Description)
 
@@ -273,7 +273,7 @@ GSEA.res <- GSEA.res %>%
 
 
 ### UpSet plot -----------------------------------------------------------------
-all.sets <- read_tsv("data/05_inflammationGeneSets.tsv")
+all.sets <- read_tsv("data/06_inflammationGeneSets.tsv")
 
 all.sets <- all.sets %>% 
   left_join(distinct(dplyr::select(GSEA.res, ID, Description)), 
@@ -292,7 +292,7 @@ ComplexUpset::upset(
   width_ratio = 0.2,
   min_size = 2)
 
-ggsave("figures/07_UpSet_geneSets.png", w = 15, h=11)
+ggsave("figures/08_UpSet_geneSets.png", w = 15, h=11)
 
 ### Dotplot --------------------------------------------------------------------
 
@@ -318,12 +318,12 @@ gsea_plot <- GSEA.res %>%
 
 gsea_plot
 
-ggsave("figures/07_GSEA_results.png",
+ggsave("figures/08_GSEA_results.png",
        gsea_plot,
        w = 13, h = 9)
 
 # 4. Volcano plot --------------------------------------------------------------
-UC.hansen <- read_tsv("data/05_UC_hansen_processed.tsv")
+UC.hansen <- read_tsv("data/06_UC_hansen_processed.tsv")
 
 sig_up <- dim(UC.hansen %>% filter(adj_pvalue < 0.01, logFC > 0))[1]
 sig_up_inf <- dim(UC.hansen %>% filter(adj_pvalue < 0.01, logFC > 0, top_2000 == "yes"))[1]
@@ -356,7 +356,7 @@ volcano <- ggplot(UC.hansen, aes(x = logFC, y = -log10(adj_pvalue), color = sign
 
 volcano
 
-ggsave("figures/07_volcano_UCprot_usecase.png",
+ggsave("figures/08_volcano_UCprot_usecase.png",
        volcano,
        h = 8, w = 10)
 
@@ -368,7 +368,7 @@ p <- plot_grid(gsea_plot, volcano,
           label_size = 24)
 p
 
-ggsave("figures/07_GSEA_volcano.png",
+ggsave("figures/08_GSEA_volcano.png",
        p,
        h=12,
        w=20)
@@ -387,3 +387,23 @@ ggsave("figures/07_GSEA_volcano.png",
 #       w=13)
 
 # 5. Correlation to scores -----------------------------------------------------
+scores <- read.table("data/05_score_UC_andersen.tsv", sep = "\t")
+
+correlation <- cor(scores$expr.UC.100.m, scores$score)
+
+ggplot(data, aes(y = expr.UC.100.m, x = score)) +
+  geom_point() +
+  geom_smooth(method = "lm", color = "red", se = FALSE) + 
+  #labs(x = paste(type,"inflammatome"), x = "Colon inflammation grade score", title = "") +
+  labs(y = "Inflammation signature-based score", x = "Colon inflammation grade score", title = "") +
+  theme_classic() +
+  # Add correlation coefficient as text
+  annotate("text", y = max(expr.UC.100.mean) + 0.3 , x = max(score), 
+           label = paste("Pearson r =", round(correlation, 2)), 
+           hjust = 1.5, vjust = 3, color = "red", size = 3.5)
+
+# ggsave(paste0(figures, "scatter.cor.UC.Andersen.",type,".pdf"), device = "pdf", width = 5, height = 3)
+ggsave("figures/08_scatter_score_UseCase.png", device = "png", width = 5, height = 3)
+
+
+
