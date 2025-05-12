@@ -215,9 +215,9 @@ all.sets %>% count(gs) %>%
   theme_bw() +
   labs(title = "Distribution of gene set sizes")
 
-# write_tsv(all.sets, "data/05_inflammationGeneSets.tsv") # (06/12/2024)
+# write_tsv(all.sets, "data/06_inflammationGeneSets.tsv") # (06/12/2024)
 
-all.sets <- read_tsv("data/05_inflammationGeneSets.tsv")
+all.sets <- read_tsv("data/06_inflammationGeneSets.tsv")
 
 ## Check overlap ---------------------------------------------------------------
 
@@ -245,7 +245,7 @@ ComplexUpset::upset(
   width_ratio = 0.2,
   min_size = 1)
 
-ggsave("figures/05_UpSet_geneSets.png", w = 25, h=12)
+ggsave("figures/06_UpSet_geneSets.png", w = 25, h=12)
 
 jaccard_similarity <- function(x, y) {
   intersection <- length(intersect(x, y))
@@ -340,7 +340,7 @@ p_AH <- dotplot(gsea_AH,
                 showCategory = 13) + ggtitle("Alcoholic hepatitis") 
 
 p_AH
-ggsave("figures/05_AH_dotplot.png", 
+ggsave("figures/06_AH_dotplot.png", 
        p_AH,
        h = 9,
        w = 10)
@@ -349,7 +349,7 @@ ggsave("figures/05_AH_dotplot.png",
 gsea_igan <- run_gsea(igan, all.sets, "stat")
 p_igan <- dotplot(gsea_igan, x = "NES", size= "GeneRatio",showCategory = 13) + ggtitle("IgA Nephropathy")
 p_igan
-ggsave("figures/05_igan_dotplot.png", 
+ggsave("figures/06_igan_dotplot.png", 
        p_igan,
        h = 9,
        w = 10)
@@ -358,7 +358,7 @@ ggsave("figures/05_igan_dotplot.png",
 gsea_MS <- run_gsea(MS, all.sets, "stat")
 p_MS <- dotplot(gsea_MS, x = "NES", size= "GeneRatio",showCategory = 13) + ggtitle("Multiple sclerosis") 
 p_MS
-ggsave("figures/05_MS_dotplot.png", 
+ggsave("figures/06_MS_dotplot.png", 
        p_MS,
        h = 9,
        w = 10)
@@ -373,7 +373,7 @@ gsea_UC.hansen.lfc <- run_gsea(UC.hansen, all.sets, "logFC")
 dotplot(gsea_UC.hansen.lfc, x = "NES", size= "GeneRatio",showCategory = 13) + ggtitle("UC Hansen LFC") 
 # super similar
 
-ggsave("figures/05_UC_hansen_dotplot.png", 
+ggsave("figures/06_UC_hansen_dotplot.png", 
        p_hansen,
        h = 9,
        w = 10)
@@ -390,7 +390,7 @@ p_andersen
 gsea_UC.andersen.lfc <- run_gsea(UC.andersen, all.sets, "logFC")
 dotplot(gsea_UC.andersen.lfc, x = "NES", size= "GeneRatio",showCategory = 13) + ggtitle("UC Andersen LFC") 
 
-ggsave("figures/05_UC_andersen_dotplot.png", 
+ggsave("figures/06_UC_andersen_dotplot.png", 
        p_andersen,
        h = 9,
        w = 10)
@@ -417,7 +417,7 @@ results <- results %>%
                                  dataset == "UC.andersen" ~ "UC (Bennike et al.)"),
          Description = if_else(Description == "top100", "Inflammation signature", Description))
 
-#write_tsv(results, "data/05_GSEA_results.tsv")
+#write_tsv(results, "data/06_GSEA_results.tsv")
 
 results %>%
   ggplot(aes(x = reorder(dataset_lab,desc(-log10(p.adjust))), y = reorder(Description,-log10(p.adjust)))) + 
@@ -434,7 +434,7 @@ results %>%
     size = expression(-log[10]("adj. p-value"))) +
   theme_bw()
   
-ggsave("figures/05_GSEA_results_summary.png",
+ggsave("figures/06_GSEA_results_summary.png",
        w = 11, h = 7)
 
 
@@ -506,7 +506,7 @@ results %>%
     plot.title = element_text(hjust = 0.5, size = 14, face = "bold")
   )
 
-ggsave("figures/05_dotplot_combined_allsets.png",
+ggsave("figures/06_dotplot_combined_allsets.png",
        bg = "white",
        h=15,
        w=22)
@@ -591,7 +591,7 @@ UC.hansen$significance <- ifelse(
   "not_significant"
 )
 
-write_tsv(UC.hansen, "data/05_UC_hansen_processed.tsv")
+write_tsv(UC.hansen, "data/06_UC_hansen_processed.tsv")
 
 ggplot(UC.hansen, aes(x = logFC, y = -log10(adj_pvalue), color = significance, alpha = significance)) +
   geom_point(size = .3) +
@@ -614,7 +614,7 @@ ggplot(UC.hansen, aes(x = logFC, y = -log10(adj_pvalue), color = significance, a
   theme(legend.position = "none")
 # weird that some pvals are == 1
 
-ggsave("figures/05_volcano_UCprot_usecase.png", h = 8, w = 10)
+ggsave("figures/06_volcano_UCprot_usecase.png", h = 8, w = 10)
 
 ## Alcoholic hepatitis ---------------------------------------------------------
 AH <- AH %>%
