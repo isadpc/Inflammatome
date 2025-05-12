@@ -49,12 +49,13 @@ MS <- read_tsv("data/02_GSE138614_MS_CTL.tsv") %>%
 
 ## Proteomics ------------------------------------------------------------------
 UC.hansen.pre <- read_excel("data/supp.table.processed.xlsx", sheet = "All proteins")
-UC.andersen <- read_tsv("data/raw/DE.res.UC.Andersen.tsv")  # DE by Oana, t stat
+# UC.andersen <- read_tsv("data/raw/DE.res.UC.Andersen.tsv")  # DE by Oana, t stat
+UC.andersen <- read_tsv("data/05_DE_UC_andersen.tsv")
 
 UC.andersen <- UC.andersen %>%
-  rename(ENSG.ID = ensembl_gene_id,
+  dplyr::rename(ENSG.ID = ensembl_gene_id,
          stat = t) %>%
-  filter(ENSG.ID %in% Final_Annotation_List$ENSG.ID)
+  filter(ENSG.ID %in% all.genes$ENSG.ID)
 
 ### UC Hansen data processing --------------------------------------------------
 # filter proteins in over 70% samples (they do this in the paper)
@@ -89,7 +90,32 @@ UC.hansen <- rbind(multiple.genes, single.gene) %>%
 UC.hansen <- UC.hansen %>%
   rename(stat = sorting.value) %>%
   inner_join(Final_Annotation_List)
+
+## test T2D obesity ------------------------------------------------------------
+t2d <- read_excel("adi7548_Data_S1.xlsx", sheet = "B. Complete_data_matrix")
+
+t2d <- dplyr::rename(t2d, Gene.name = Genename)
+
+length(unique(t2d$Gene.name))
+count(t2d, Gene.name) %>% filter(n>1)
+
+dim(t2d %>% filter(Gene.name %in% Final_Annotation_List$Gene.name))
+t2d <- t2d %>% filter(Gene.name %in% Final_Annotation_List$Gene.name)
+
+length(unique(t2d$Gene.name))
+count(t2d, Gene.name) %>% filter(n>1)
+# just one gene that is duplicated, take the one with lowest p val across contrasts
+
+t2d <- t2d %>%
+  mutate(sort.t2d.lean = as.numeric(T2D_Lean_logFC)*-log(p.adjust(as.numeric(T2D_Lean_P.Value), method = "BH")),
+         sort.t2d.ob = as.numeric(T2D_Obese_logFC)*-log(p.adjust(as.numeric(T2D_Obese_P.Value), method = "BH")),
+         sort.ob.lean = as.numeric(Obese_Lean_logFC)*-log(p.adjust(as.numeric(Obese_Lean_P.Value), method = "BH"))) #%>%
+   #group_by(Gene.name) %>% 
+   #filter(sum(as.numeric(c(T2D_Lean_P.Value,T2D_Obese_P.Value, Obese_Lean_P.Value))) == min(sum(as.numeric(c(T2D_Lean_P.Value,T2D_Obese_P.Value, Obese_Lean_P.Value))))) %>%
+   #ungroup()
   
+t2d <- t2d %>% filter(Gene.name != "PALM2AKAP2")
+
 # Prepare gene sets ------------------------------------------------------------
 # top 100, msigdb hallmark inflammatory response, GO:BP inflammatory response
 
@@ -323,7 +349,7 @@ run_gsea <- function(results_list, gene_sets, sorting_var){
     TERM2GENE = gene_sets, 
     minGSSize = 0, 
     maxGSSize = 2000, 
-    pvalueCutoff = 10,
+    pvalueCutoff = 0.05,
     eps = 0
   )
   
@@ -393,6 +419,19 @@ ggsave("figures/05_UC_andersen_dotplot.png",
        p_andersen,
        h = 9,
        w = 10)
+
+## Obesity test ----------------------------------------------------------------
+t2d <- t2d %>% left_join(Final_Annotation_List)
+t2d.ob <- run_gsea(drop_na(t2d, sort.t2d.ob), all.sets, "sort.t2d.ob")
+dotplot(t2d.ob, x = "NES", size= "GeneRatio",showCategory = 13) + ggtitle("T2d vs Ob") 
+
+
+t2d.lean <- run_gsea(drop_na(t2d, sort.t2d.lean), all.sets, "sort.t2d.lean")
+dotplot(t2d.lean, x = "NES", size= "GeneRatio",showCategory = 13) + ggtitle("T2d vs lean") 
+
+ob.lean <- run_gsea(drop_na(t2d, sort.ob.lean), all.sets, "sort.ob.lean")
+dotplot(ob.lean, x = "NES", size= "GeneRatio",showCategory = 13) + ggtitle("ob vs lean") 
+
 
 ## Table with all results ------------------------------------------------------
 gsea_AH.res <- gsea_AH@result %>% mutate(dataset = "AH")
@@ -717,3 +756,87 @@ for(case2 in distinct(test, case)$case){
   print(p)
 }
 
+
+## test ------------------------------------------------------------------------
+# Load packages ----------------------------------------------------------------
+library(DESeq2)
+library(GEOquery)
+
+exer <- read.csv("~/Documents/inflammatome_R_project/GSE202295_gene_counts.txt.gz", sep="")
+
+exer <- exer %>% 
+  mutate(ENSG.ID = gsub("(.+)(\\.\\d+)", "\\1", Geneid)) 
+
+rownames(exer) <- exer$ENSG.ID
+
+count <- exer %>%
+  dplyr::select(- c(gene_name, Geneid, ENSG.ID))
+
+## get series matrix -----------------------------------------------------------
+gset <- getGEO("GSE202295")
+meta <- pData(gset[[1]])
+gset
+
+## clean meta  ----------------------------------------------------------------
+meta <- meta %>%
+  mutate(
+    patient = str_extract(title, "(?<=_)(\\d+)(?=_[basal|post|rec])"),
+    sample = str_extract(title, "(?<=\\[)(.*?)(?=\\])"),
+    sample = paste0(sample, "Aligned.sortedByCoord.out.bam")
+  ) %>%
+  rename(timepoint = `timepoint:ch1`)
+
+## arrange samples -------------------------------------------------------------
+count <- count[, meta$sample]
+all(meta$sample == colnames(count))
+# rename samples
+colnames(count) <- meta$geo_accession
+
+## create deseq2 object + QC ---------------------------------------------------
+dds <- DESeqDataSetFromMatrix(countData = count,
+                              colData = meta,
+                              design = ~ 1)
+dds
+
+# filter low counts 
+nrow(dds)
+dds <- dds[rowSums(counts(dds)) >= 1,] 
+nrow(dds)
+
+count.vst <- vst(dds, blind = FALSE)
+count.vst <- assay(count.vst)
+
+length(intersect(rownames(count.vst), top.100))
+# only 25 genes
+setdiff(top.100, rownames(count.vst))
+
+
+# add score to meta
+meta$score <- colMeans(count.vst[intersect(rownames(count.vst), top.100),])
+
+meta %>% 
+  ggplot(aes(timepoint, score)) +
+  geom_boxplot()
+  
+meta %>% 
+  ggplot(aes(timepoint, score)) +
+  geom_boxplot() +
+  facet_wrap(~`diagnosis:ch1`)
+
+meta %>% 
+  ggplot(aes(x = timepoint, y = score, group = patient)) +
+  geom_point() +  # Add points for the scores
+  geom_line() +   # Connect the dots with lines for each patient
+  theme_minimal() +  # Optional: for a cleaner plot theme
+  labs(x = "Timepoint", y = "Score", title = "Patient Timeline of Scores") +
+  theme(legend.position = "none") + # Optional: removes the legend 
+  facet_wrap(~patient)
+
+meta %>% 
+  ggplot(aes(x = timepoint, y = score, group = patient)) +
+  geom_point() +  # Add points for the scores
+  geom_line() +   # Connect the dots with lines for each patient
+  theme_minimal() +  # Optional: for a cleaner plot theme
+  labs(x = "Timepoint", y = "Score", title = "Patient Timeline of Scores") +
+  theme(legend.position = "none") + # Optional: removes the legend 
+  facet_wrap(~`diagnosis:ch1`)
