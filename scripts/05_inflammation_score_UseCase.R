@@ -28,10 +28,14 @@ df.prot = df.prot[!df.prot$Contaminant=="+",]
 # Extract Uniprot ID and Gene name from Majority.protein.IDs column
 df.prot$Majority.protein.IDs=as.character(df.prot$Majority.protein.IDs)
 
+#df.prot <- df.prot %>% 
+#  separate_longer_delim(cols=Majority.protein.IDs, delim = ";") %>%
+#  separate_wider_delim(cols=Majority.protein.IDs, names=c('sp', 'UniprotID','Gene.name.full'), 
+#                       delim="|", cols_remove=FALSE, too_many = "error")
+
 df.prot <- df.prot %>% 
-  separate_longer_delim(cols=Majority.protein.IDs, delim = ";") %>%
   separate_wider_delim(cols=Majority.protein.IDs, names=c('sp', 'UniprotID','Gene.name.full'), 
-                       delim="|", cols_remove=FALSE, too_many = "error")
+                       delim="|", cols_remove=FALSE, too_many = "drop")
 
 df.prot <- df.prot %>% 
   separate_wider_delim(Gene.name.full, names=c('Gene.name', 'Gene.description'), 

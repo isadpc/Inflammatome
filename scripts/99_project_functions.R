@@ -16,6 +16,8 @@ STRING_ENSP_to_ENSG <- read_tsv( "data/human.aliases.filtered.txt",
   dplyr::select(-c(tax, data.type)) 
 
 ## msigdb inflammation markers -------------------------------------------------
+# for consistency:
+#install.packages("~/Downloads/msigdbr_7.5.1.tar.gz", repos = NULL, type = "source")
 library(msigdbr)
 
 h <- msigdbr(species = "Homo sapiens", category = "H") %>% 
@@ -31,7 +33,8 @@ msigdb.markers %>%
 # there are 22 with NA in gene.type
 msigdb.markers %>% 
   left_join(Final_Annotation_List) %>%
-  filter(is.na(Gene.type)) %>% print(n=22)
+  filter(is.na(Gene.type)) %>%
+  print(n=22)
 # if you look at gene.name they are all in annotation as protein coding,
 # but the ENSG.IDs don't match
 

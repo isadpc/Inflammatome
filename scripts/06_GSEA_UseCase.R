@@ -48,8 +48,8 @@ MS <- read_tsv("data/02_GSE138614_MS_CTL.tsv") %>%
   filter(ENSG.ID %in% Final_Annotation_List$ENSG.ID)
 
 ## Proteomics ------------------------------------------------------------------
-UC.hansen.pre <- read_excel("data/supp.table.processed.xlsx", sheet = "All proteins")
-# UC.andersen <- read_tsv("data/raw/DE.res.UC.Andersen.tsv")  # DE by Oana, t stat
+UC.hansen.pre <- read_excel("data/raw/supp.table.processed.xlsx", sheet = "All proteins")
+#UC.andersen <- read_tsv("data/raw/DE.res.UC.Andersen.tsv")  # DE by Oana, t stat
 UC.andersen <- read_tsv("data/05_DE_UC_andersen.tsv")
 
 UC.andersen <- UC.andersen %>%
@@ -88,7 +88,7 @@ UC.hansen <- rbind(multiple.genes, single.gene) %>%
 # create sorting value:  logFC*-log(pval) 
 
 UC.hansen <- UC.hansen %>%
-  rename(stat = sorting.value) %>%
+  dplyr::rename(stat = sorting.value) %>%
   inner_join(Final_Annotation_List)
 
 # Prepare gene sets ------------------------------------------------------------
@@ -99,7 +99,7 @@ UC.hansen <- UC.hansen %>%
 go <- msigdbr(species = "Homo sapiens", category = "C5") %>% 
   dplyr::select(gs_name, ensembl_gene, gene_symbol, gs_exact_source) %>%
   filter(gs_exact_source %in% c("GO:0002534", "GO:0006954", "GO:0002526", "GO:0002544")) %>%
-  rename(gene = ensembl_gene,
+  dplyr::rename(gene = ensembl_gene,
          gs = gs_name)
 
 go %>% 
@@ -148,7 +148,7 @@ go <- go %>%
 wp <- msigdbr(species = "Homo sapiens", category = "C2") %>% 
   dplyr::select(gs_name, ensembl_gene, gene_symbol, gs_exact_source) %>%
   filter(gs_exact_source %in% c("WP4493", "WP530", "WP5198", "WP453")) %>%
-  rename(gene = ensembl_gene,
+  dplyr::rename(gene = ensembl_gene,
          gs = gs_name)
 
 #wp <- msigdbr(species = "Homo sapiens", category = "C2") %>% 
@@ -178,7 +178,7 @@ wp <- wp %>%
 reactome <- msigdbr(species = "Homo sapiens", category = "C2") %>% 
   dplyr::select(gs_name, ensembl_gene, gene_symbol, gs_exact_source) %>%
   filter(gs_exact_source %in% c("R-HSA-622312", "R-HSA-913531", "R-HSA-9020702", "R-HSA-75893")) %>%
-  rename(gene = ensembl_gene,
+  dplyr::rename(gene = ensembl_gene,
          gs = gs_name)
 
 reactome %>% 
@@ -324,7 +324,7 @@ run_gsea <- function(results_list, gene_sets, sorting_var){
     TERM2GENE = gene_sets, 
     minGSSize = 0, 
     maxGSSize = 2000, 
-    pvalueCutoff = 0.05,
+    pvalueCutoff = 10,
     eps = 0
   )
   
@@ -420,7 +420,7 @@ results <- results %>%
 #write_tsv(results, "data/06_GSEA_results.tsv")
 
 results %>%
-  ggplot(aes(x = reorder(dataset_lab,desc(-log10(p.adjust))), y = reorder(Description,-log10(p.adjust)))) + 
+  ggplot(aes(x = reorder(dataset_lab, dplyr::desc(-log10(p.adjust))), y = reorder(Description,-log10(p.adjust)))) + 
   scale_size_continuous(range = c(1, 15)) +
   geom_point(aes(fill = NES, size = -log10(p.adjust)), shape = 21, colour = "black",alpha = 0.7) +
   geom_point(aes(x = dataset_lab,
