@@ -21,7 +21,7 @@ This repository contains the R code, data, and scripts for reproducing the analy
   - `07_network_annotations.R`: Network annotation and analysis for inflammation-related genes.
   - `08_paper_figures.R`: Scripts to generate figures included in the paper.
   - `99_project_functions.R`: Custom functions used across multiple scripts.
-  - `pre-analysis/`: Contains auxiliary scripts used before main analyses:
+  - `pre-analysis/`: Contains auxiliary scripts used before main analyses. The output of these scripts is frozen for reproducibility:
     - `gene_annotation.R`: Processes and annotates gene information.
     - `textmined_markers.R`: Retrieves and processes text-mined inflammatory markers.
 
