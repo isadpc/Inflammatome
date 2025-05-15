@@ -1,0 +1,43 @@
+GEO_acc	file_type	expected_path	link
+GSE109142	metadata	data/raw/SraRunTable.GSE109142.txt	https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA429769&o=acc_s%3Aa
+GSE198520	count matrix	data/raw/GSE198520_Raw_gene_count_matrix.txt.gz	https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE198520&format=file&file=GSE198520%5FRaw%5Fgene%5Fcount%5Fmatrix%2Etxt%2Egz
+GSE198520	metadata	data/raw/SraRunTable.GSE198520.txt	https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA815686&o=acc_s%3Aa
+GSE137344	count matrix	data/raw/GSE137344_Raw_Counts.txt.gz	https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE137344&format=file&file=GSE137344%5FRaw%5FCounts%2Etxt%2Egz
+GSE137344	metadata	data/raw/SraRunTable.GSE137344.txt	https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA565216&o=acc_s%3Aa
+GSE166925	count matrix	data/raw/GSE166925_featurecounts_counts.txt.gz	https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE166925&format=file&file=GSE166925%5Ffeaturecounts%5Fcounts%2Etxt%2Egz
+GSE166925	metadata	data/raw/SraRunTable.GSE166925.txt	https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA702434&o=acc_s%3Aa
+GSE138614	count matrix	data/raw/GSE138614_countMatrix.txt.gz	https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE138614&format=file&file=GSE138614%5FcountMatrix%2Etxt%2Egz
+GSE138614	metadata	data/raw/SraRunTable.GSE138614.txt	https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA576512&o=acc_s%3Aa
+GSE123496	count matrix	data/raw/GSE123496_Human_MSNL_counts.m.csv.gz	https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE123496&format=file&file=GSE123496%5FHuman%5FMSNL%5Fcounts%2Em%2Ecsv%2Egz
+GSE123496	metadata	data/raw/SraRunTable.GSE123496.txt	https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA508944&o=acc_s%3Aa
+GSE126848	count matrix	data/raw/GSE126848_Gene_counts_raw.txt.gz	https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE126848&format=file&file=GSE126848%5FGene%5Fcounts%5Fraw%2Etxt%2Egz
+GSE126848	metadata	data/raw/SraRunTable.GSE126848.txt	https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA523510&o=acc_s%3Aa
+GSE142530	count matrix	data/raw/GSE142530_Annoted-RNAseq-with-SampleIDs.csv.gz	https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE142530&format=file&file=GSE142530%5FAnnoted%2DRNAseq%2Dwith%2DSampleIDs%2Ecsv%2Egz
+GSE142530	metadata	data/raw/SraRunTable.GSE142530.txt	https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA597328&o=acc_s%3Aa
+GSE124180	count matrix	data/raw/GSE124180_gene_count_table.tsv.gz	https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE124180&format=file&file=GSE124180%5Fgene%5Fcount%5Ftable%2Etsv%2Egz
+GSE100297	count matrix	data/raw/GSE100297_hg19.gene_NL_Opt.txt.gz	https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE100297&format=file&file=GSE100297%5Fhg19%2Egene%5FMS%5FOpt%2Etxt%2Egz
+GSE100297	count matrix	data/raw/GSE100297_hg19.gene_MS_Opt.txt.gz	https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE100297&format=file&file=GSE100297%5Fhg19%2Egene%5FNL%5FOpt%2Etxt%2Egz
+GSE100297	metadata	data/raw/SraRunTable.GSE100297.txt	https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA391285&o=acc_s%3Aa
+GSE66511	count matrix	data/raw/GSE66511_Psoriasis_counts.txt.gz	https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE66511&format=file&file=GSE66511%5FPsoriasis%5Fcounts%2Etxt%2Egz
+GSE66511	metadata	data/raw/SraRunTable.GSE66511.txt	https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA277180&o=acc_s%3Aa
+GSE197307	count matrix	data/raw/GSE197307_NEPTUNE_Glom_RNA_counts_2022.txt.gz	https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE197307&format=file&file=GSE197307%5FNEPTUNE%5FGlom%5FRNA%5Fcounts%5F2022%2Etxt%2Egz
+GSE197307	metadata	data/raw/GSE197307_series_matrix.txt	https://ftp.ncbi.nlm.nih.gov/geo/series/GSE197nnn/GSE197307/matrix/GSE197307_series_matrix.txt.gz
+GSE84346	count matrix	data/raw/GSE84346_UniqueReadCounts.txt.gz	https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE84346&format=file&file=GSE84346%5FUniqueReadCounts%2Etxt%2Egz
+GSE84346	metadata	data/raw/SraRunTable.GSE84346.txt	https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA328986&o=acc_s%3Aa
+GSE148036	count matrix	data/raw/GSE148036_PRJNA609278count_matrix.txt.g	https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE148036&format=file&file=GSE148036%5FPRJNA609278count%5Fmatrix%2Etxt%2Egz
+GSE148036	metadata	data/raw/GSE148036_series_matrix.txt.gz	https://ftp.ncbi.nlm.nih.gov/geo/series/GSE148nnn/GSE148036/matrix/GSE148036_series_matrix.txt.gz
+GSE150910	count matrix	data/raw/GSE150910_gene_level_count_file.csv.gz	https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE150910&format=file&file=GSE150910%5Fgene%2Dlevel%5Fcount%5Ffile%2Ecsv%2Egz
+GSE150910	metadata	data/raw/GSE150910_series_matrix.txt.gz	https://ftp.ncbi.nlm.nih.gov/geo/series/GSE150nnn/GSE150910/matrix/GSE150910_series_matrix.txt.gz
+GSE231693	count matrix	data/raw/GSE231693_count.tsv.gz	https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE231693&format=file&file=GSE231693%5Fcount%2Etsv%2Egz
+GSE154926	count matrix	data/raw/GSE154926_Raw_gene_counts_43pSS+7HVs.csv.gz	https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE154926&format=file&file=GSE154926%5FRaw%5Fgene%5Fcounts%5F43pSS%2B7HVs%2Ecsv%2Egz
+GSE244120	count matrix	data/raw/GSE244120_thigh.muscle_all.gene_counts.txt.gz	https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE244120&format=file&file=GSE244120%5Fthigh%2Emuscle%5Fall%2Egene%5Fcounts%2Etxt%2Egz
+GSE244118	count matrix	data/raw/GSE244118_abdominal.fat_all.gene_counts.txt.gz	https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE244118&format=file&file=GSE244118%5Fabdominal%2Efat%5Fall%2Egene%5Fcounts%2Etxt%2Egz
+GSE141295	metadata	data/raw/SraRunTable.GSE141295.txt	https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA593015&o=acc_s%3Aa
+GSE125583	metadata	data/raw/SraRunTable.PRJNA516886.txt	https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA516886&o=acc_s%3Aa
+GSE236758	metadata	data/raw/SraRunTable.PRJNA992371.txt	https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA992371&o=acc_s%3Aa
+GSE57148	metadata	data/raw/SraRunTable.GSE57148.txt	https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA245811&o=acc_s%3Aa
+GSE121212	metadata	data/raw/SraRunTable.GSE121212.txt	https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA496323&o=acc_s%3Aa
+GSE104704	metadata	data/raw/SraRunTable.GSE104704.txt	https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA413568&o=acc_s%3Aa
+GSE203206	metadata	data/raw/SraRunTable.GSE203206.txt	https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA839035&o=acc_s%3Aa
+GSE193309	metadata	data/raw/SraRunTable.GSE193309.txt	https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA795775&o=acc_s%3Aa
+GSE175759	metadata	data/raw/SraRunTable.GSE175759.txt	https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA733490&o=acc_s%3Aa
