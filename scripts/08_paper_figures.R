@@ -402,7 +402,6 @@ ggplot(data, aes(y = expr.UC.100.m, x = score)) +
            label = paste("Pearson r =", round(correlation, 2)), 
            hjust = 1.5, vjust = 3, color = "red", size = 3.5)
 
-# ggsave(paste0(figures, "scatter.cor.UC.Andersen.",type,".pdf"), device = "pdf", width = 5, height = 3)
 ggsave("figures/08_scatter_score_UseCase.png", device = "png", width = 5, height = 3)
 
 
