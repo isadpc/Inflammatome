@@ -496,7 +496,7 @@ meta.GSE123496 <- meta_raw.GSE123496 %>%
     disease_state == "healthy control" ~ "Control"
   )) 
 
-count.GSE123496 <- read_csv(paste("data/raw/", "GSE123496_Human_MSNL_counts.m.csv", sep = "")) %>% 
+count.GSE123496 <- read_csv(paste("data/raw/", "GSE123496_Human_MSNL_counts.m.csv.gz", sep = "")) %>% 
   dplyr::rename("Gene.name.ID" = "...1")
 
 #Analyze (diff expression: logFold changes)
@@ -572,7 +572,7 @@ meta.GSE126848 <- meta_raw.GSE126848 %>%
     disease == "obese" ~ "Obese"
   ))
 
-count.GSE126848 <- read_tsv(paste("data/raw/", "GSE126848_Gene_counts_raw.txt", sep = "")) %>% 
+count.GSE126848 <- read_tsv(paste("data/raw/", "GSE126848_Gene_counts_raw.txt.gz", sep = "")) %>% 
   dplyr::rename("Gene.name.ID" = "key")
 
 #Analyze (diff expression: logFold changes)
@@ -666,7 +666,7 @@ meta.GSE142530 <- meta_raw.GSE142530 %>%
     disease_state == "Alcohol-related Cirrhosis" ~ "Alcohol_related_Cirrhosis"
   ))
 
-count.GSE142530_raw <- read_csv(paste("data/raw/", "GSE142530_Annoted-RNAseq-with-SampleIDs.csv", sep = ""))
+count.GSE142530_raw <- read_csv(paste("data/raw/", "GSE142530_Annoted-RNAseq-with-SampleIDs.csv.gz", sep = ""))
 
 count.GSE142530 <- count.GSE142530_raw %>% 
   dplyr::select(-gene_name) %>% 
@@ -778,7 +778,7 @@ meta.GSE124180 <- meta.GSE124180.proc %>%
 
 rownames(meta.GSE124180)
 
-count.GSE124180_raw <- read_tsv(paste("data/raw/", "GSE124180_gene_count_table.tsv", sep = "")) 
+count.GSE124180_raw <- read_tsv(paste("data/raw/", "GSE124180_gene_count_table.tsv.gz", sep = "")) 
 
 count.GSE124180 <- count.GSE124180_raw %>% 
   filter(!row_number() %in% 1) %>% 
@@ -859,9 +859,9 @@ meta.GSE100297 <- meta_raw.GSE100297 %>%
     TRUE ~ as.character(disease_state)
   ))
 
-count.GSE100297_CTL_raw <- read_tsv(paste("data/raw/", "GSE100297_hg19.gene_NL_Opt.txt", sep = ""))
+count.GSE100297_CTL_raw <- read_tsv(paste("data/raw/", "GSE100297_hg19.gene_NL_Opt.txt.gz", sep = ""))
 
-count.GSE100297_MS_raw <- read_tsv(paste("data/raw/", "GSE100297_hg19.gene_MS_Opt.txt", sep = ""))
+count.GSE100297_MS_raw <- read_tsv(paste("data/raw/", "GSE100297_hg19.gene_MS_Opt.txt.gz", sep = ""))
 
 count.GSE100297 <- merge(count.GSE100297_CTL_raw, count.GSE100297_MS_raw, by = c("Gene.name.ID", "width")) %>% 
   dplyr::select(-width)
@@ -938,7 +938,7 @@ meta.GSE66511 <- meta_raw.GSE66511 %>%
   mutate(disease = if_else(Condition == "C", "Ctl", "Pso"))
 #filter(Condition != "C") #remove healthy controls form paired design
 
-count.GSE66511_raw <- read_tsv(paste("data/raw/", "GSE66511_Psoriasis_counts.txt", sep = ""))
+count.GSE66511_raw <- read_tsv(paste("data/raw/", "GSE66511_Psoriasis_counts.txt.gz", sep = ""))
 
 count.GSE66511_temp <- count.GSE66511_raw %>% 
   dplyr::rename("Gene.name.ID" = "Symbol")
@@ -1040,7 +1040,7 @@ benchmark_plot_RNA(res, "GSE66511: PSO vs control")
 
 #https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE197307
 
-meta_raw.GSE197307 <- read_tsv(paste("data/raw/", "GSE197307_series_matrix.txt", sep = ""), skip = 31)
+meta_raw.GSE197307 <- read_tsv(paste("data/raw/", "GSE197307_series_matrix.txt.gz", sep = ""), skip = 31)
 
 meta_temp.GSE197307 <- meta_raw.GSE197307 %>% 
   mutate(`!Sample_title` = paste0(`!Sample_title`, "_", seq(1, nrow(.), 1))) %>% #assign unique names to columns
@@ -1064,7 +1064,7 @@ meta.GSE197307 <- meta_temp2.GSE197307 %>%
 #filter(!Condition %in% c("Nephrotic_Syndrome,_unspecified", "Other_Nephrotic_Syndrome")) #removed unrelated diseases/samples
 
 
-count.GSE197307_raw <- read_tsv(paste("data/raw/", "GSE197307_NEPTUNE_Glom_RNA_counts_2022.txt", sep = ""))
+count.GSE197307_raw <- read_tsv(paste("data/raw/", "GSE197307_NEPTUNE_Glom_RNA_counts_2022.txt.gz", sep = ""))
 
 count.GSE197307 <- count.GSE197307_raw %>% 
   mutate(Gene.name.ID = str_replace(count.GSE197307_raw$ENSEMBL_ene_ID, "ENS", "ENSG")) %>% 
@@ -1187,7 +1187,7 @@ meta.GSE84346 %>% dplyr::count(Condition, patient_identifier)
 # there are paired treated - untreated samples
 meta.GSE84346 %>% dplyr::count(treatment_bin, patient_identifier)
 
-count.GSE84346 <- read_tsv(paste("data/raw/", "GSE84346_UniqueReadCounts.txt", sep = "")) %>% 
+count.GSE84346 <- read_tsv(paste("data/raw/", "GSE84346_UniqueReadCounts.txt.gz", sep = "")) %>% 
   dplyr::rename("Gene.name.ID" = "GeneID")
 
 #Analyze (diff expression: logFold changes)
@@ -1278,7 +1278,7 @@ write_tsv(res, "data/02_GSE84346_HCV_paired.tsv")
 
 #https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE148036
 
-meta_raw.GSE148036 <- read_tsv(paste("data/raw/", "GSE148036_series_matrix.txt", sep = ""), skip = 38)
+meta_raw.GSE148036 <- read_tsv(paste("data/raw/", "GSE148036_series_matrix.txt.gz", sep = ""), skip = 38)
 
 meta_temp.GSE148036 <- meta_raw.GSE148036 %>% 
   mutate(`!Sample_title` = paste0(`!Sample_title`, "_", seq(1, nrow(.), 1))) %>% #assign unique names to columns
@@ -1297,7 +1297,7 @@ meta.GSE148036 <- meta_temp.GSE148036 %>%
   mutate(Condition = str_replace(meta_temp.GSE148036$Disease, "disease: ", "")) %>% 
   relocate(Condition, .after = Sample_ID)
 
-count.GSE148036_raw <- read_tsv(paste("data/raw/", "GSE148036_PRJNA609278count_matrix.txt", sep = ""))
+count.GSE148036_raw <- read_tsv(paste("data/raw/", "GSE148036_PRJNA609278count_matrix.txt.gz", sep = ""))
 
 count.GSE148036 <- count.GSE148036_raw %>% 
   dplyr::rename("Gene.name.ID" = "Geneid") %>% 
@@ -1388,7 +1388,7 @@ benchmark_plot_RNA(DEG_Proc_list[["AC_CTL"]], "GSE148036: Adenocarcinoma vs Heal
 
 #https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE150910
 
-meta_raw.GSE150910 <- read_tsv(paste("data/raw/", "GSE150910_series_matrix.txt", sep = ""), skip = 30)
+meta_raw.GSE150910 <- read_tsv(paste("data/raw/", "GSE150910_series_matrix.txt.gz", sep = ""), skip = 30)
 
 meta_temp.GSE150910 <- meta_raw.GSE150910 %>% 
   mutate(`!Sample_title` = paste0(`!Sample_title`, "_", seq(1, nrow(.), 1))) %>% #assign unique names to columns
@@ -1405,7 +1405,7 @@ meta.GSE150910 <- meta_temp.GSE150910 %>%
   relocate(Condition, .before = Disease) %>% 
   filter(Sample_ID != "ipf_H03") #different batch
 
-count.GSE150910_raw <- read_csv(paste("data/raw/", "GSE150910_gene_level_count_file.csv", sep = ""))
+count.GSE150910_raw <- read_csv(paste("data/raw/", "GSE150910_gene_level_count_file.csv.gz", sep = ""))
 
 count.GSE150910 <- count.GSE150910_raw %>% 
   dplyr::rename("Gene.name.ID" = "symbol") %>% 
@@ -1492,7 +1492,7 @@ meta <- pData(gset[[1]])
 meta <- meta %>%
   mutate(Condition = gsub(" ", "_", `disease state:ch1`))
 
-count.GSE231693_raw <- read_tsv(paste("data/raw/GSE231693_count.tsv", sep = ""))
+count.GSE231693_raw <- read_tsv(paste("data/raw/GSE231693_count.tsv.gz", sep = ""))
 
 count.GSE231693 <- count.GSE231693_raw %>% 
   dplyr::rename("Gene.name.ID" = "...1") %>% 
@@ -1777,7 +1777,7 @@ count <- count %>%
   column_to_rownames(var = "...1")
 
 ## get series matrix -----------------------------------------------------------
-meta <- read_csv("data/raw/SraRunTable .GSE141295.txt")
+meta <- read_csv("data/raw/SraRunTable.GSE141295.txt")
 
 ## make groups  ----------------------------------------------------------------
 meta <- meta %>% 
