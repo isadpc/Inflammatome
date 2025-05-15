@@ -105,7 +105,7 @@ meta.GSE198520 <- meta_raw.GSE198520 %>%
   mutate(Condition = Timepoint) %>% 
   mutate(Patient_ID = str_extract(Sample_ID, ".+(?=_p)"))
 
-count.GSE198520 <- read_tsv(paste("data/raw/", "GSE198520_Raw_gene_count_matrix.txt", sep="")) %>% 
+count.GSE198520 <- read_tsv(paste("data/raw/", "GSE198520_Raw_gene_count_matrix.txt.gz", sep="")) %>% 
   dplyr::rename("Gene.name.ID" = "GeneSymbol")
 colnames(count.GSE198520) <- c("Gene.name.ID", str_extract(colnames(count.GSE198520[-1]), ".+(?=_bx)"))
 
@@ -184,7 +184,7 @@ meta.GSE137344 <- meta_raw.GSE137344 %>%
   )) %>% 
   filter(Condition %in% c("Crohns_Disease", "Ulcerative_Colitis", "Control")) #removed unrelated diseases/samples
 
-rawcount.GSE137344 <- read_tsv(paste("data/raw/", "GSE137344_Raw_Counts.txt", sep = "")) %>% 
+rawcount.GSE137344 <- read_tsv(paste("data/raw/", "GSE137344_Raw_Counts.txt.gz", sep = "")) %>% 
   dplyr::rename(Gene.name.ID = `...1`)
 
 #Analyze (diff expression: logFold changes)
@@ -280,7 +280,7 @@ meta.GSE166925 <- meta_raw.GSE166925 %>%
 #Removed other contrast because DESeq2 refits >15000 genes if their samples are included
 
 # Load RNAseq counts
-count.GSE166925 <- read_tsv(paste("data/raw/", "GSE166925_featurecounts_counts.txt", sep="")) %>% 
+count.GSE166925 <- read_tsv(paste("data/raw/", "GSE166925_featurecounts_counts.txt.gz", sep="")) %>% 
   dplyr::rename("Gene.name.ID" = "gene_id") 
 
 #Analyze (diff expression: logFold changes)
@@ -374,229 +374,6 @@ benchmark_plot_RNA(DEG_Proc_list[["CD_CTLsmall"]], "GSE166925: CD inflamed vs no
 benchmark_plot_RNA(DEG_Proc_list[["CD_CTLlarge"]], "GSE166925: CD inflamed vs non-tumor tissue [large intestine]")
 benchmark_plot_RNA(DEG_Proc_list[["UC_CTL"]], "GSE166925: UC inflamed vs non-tumor tissue [large intestine]")
 
-
-# Data set GSE121212 (transcriptomics), AD & PSO, skin punch biopsies (paired) --------
-
-#https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE121212
-
-samples.GSE121212 <- read_tsv(paste("data/raw/", "GSE121212_sample_info.txt",sep=""), col_names = c("GEO_Accession (exp)", "Sample"))
-
-meta_raw.GSE121212 <- read_csv(paste("data/raw/", "SraRunTable.GSE121212.txt", sep = ""))
-
-meta_GSE121212 <- meta_raw.GSE121212 %>% 
-  left_join(samples.GSE121212, by = "GEO_Accession (exp)") %>% 
-  dplyr::rename("GEO_Accession" = "GEO_Accession (exp)") %>% 
-  separate_wider_delim(cols = "Sample", names = c("Disease", "Rest"), cols_remove = FALSE, delim = "_", too_many = "merge") %>% 
-  separate_wider_delim(cols = "Rest", names = c("Patient", "lesion"), cols_remove = FALSE, delim = "_", too_many = "merge") %>% 
-  unite("Patient_ID", c(Disease, Patient), remove = FALSE, sep = "_") %>% 
-  unite("Condition_detail", c(Disease, Skin_Type), remove = FALSE, sep = "_") %>% 
-  mutate(Condition = case_when(
-    Condition_detail == "AD_chronic_lesion" ~ "AD_lesional",
-    TRUE ~ as.character(Condition_detail)
-  )) %>% 
-  dplyr::select(-c(Patient, lesion, Rest)) %>% 
-  mutate(Condition = str_replace_all(Condition, "-", "_"))
-
-#ONLY paired samples analyzed: individually for AD_L_NL & PSO_L_NL
-table(meta_GSE121212$Condition)
-
-count.GSE121212 <- read_tsv(paste("data/raw/", "GSE121212_readcount.txt", sep = "")) %>% 
-  dplyr::rename("Gene.name.ID" = "...1") 
-
-cts_prel <- count.GSE121212 %>% 
-  filter(!str_detect(Gene.name.ID, "(?<!.)\\d+(?=-)")) %>% #removes dates & NA values in gene names
-  column_to_rownames(var = "Gene.name.ID")
-cts <- as.matrix(cts_prel)
-
-cts <- cts[, meta_GSE121212$Sample]
-rownames(meta_GSE121212) <- meta_GSE121212$Sample
-all(rownames(meta_GSE121212) %in% colnames(cts)) #compare row/column names
-all(rownames(meta_GSE121212) == colnames(cts)) #compare row/column name order
-
-## create deseq2 object + QC ---------------------------------------------------
-dds <- DESeqDataSetFromMatrix(countData = cts,
-                              colData = meta_GSE121212,
-                              design = ~ Condition)
-dds
-
-
-meta_GSE121212$Patient_ID <- factor(as.numeric(gsub("(PSO_|CTRL_|AD_)", "", meta_GSE121212$Patient_ID)))
-dds_paired <- DESeqDataSetFromMatrix(countData = cts,
-                                     colData = meta_GSE121212,
-                                     design = ~ Patient_ID + Condition)
-dds_paired
-
-# Boxplot of Raw counts: Checking if counts are already normalized 
-Boxplot_prior(cts, "02_boxplot_raw_GSE121212")
-
-# filter low counts 
-nrow(dds)
-dds <- dds[rowSums(counts(dds)) >= 1,] 
-nrow(dds)
-
-# PCA 
-scores <- PCA_norm(dds, "Condition", "02_PCA_GSE121212")
-
-# Boxplot of size factor normalized counts
-dds <- estimateSizeFactors(dds)
-count.sf_norm <- counts(dds, normalized = T)
-Boxplot_post(count.sf_norm, "02_boxplot_norm_GSE121212")
-
-# Plot dispersion estimates (WIP)
-dds <- estimateDispersions(dds)
-plotDispEsts(dds) # cant figure out how to save this plot
-
-## dge with deseq --------------------------------------------------------------
-dds <- DESeq(dds, minReplicatesForReplace=Inf)
-res1 <- as.data.frame(results(dds, contrast = c("Condition", "AD_lesional", "CTRL_healthy"),
-                              cooksCutoff=FALSE)) %>%
-  rownames_to_column(var = "Gene.name.ID")
-
-res2 <- as.data.frame(results(dds, contrast = c("Condition", "PSO_lesional", "CTRL_healthy"),
-                              cooksCutoff=FALSE)) %>%
-  rownames_to_column(var = "Gene.name.ID")
-
-#dds_paired <- DESeq(dds_paired) # need to rerun: 35 rows did not converge in beta, labelled in mcols(object)$betaConv. Use larger maxit argument with nbinomWaldTest
-dds_paired <- estimateSizeFactors(dds_paired)
-dds_paired <- estimateDispersions(dds_paired)
-dds_paired <- nbinomWaldTest(dds_paired, maxit=700)
-
-res3 <- as.data.frame(results(dds_paired, contrast = c("Condition", "AD_lesional", "AD_non_lesional")))%>% 
-  rownames_to_column(var = "Gene.name.ID")
-
-res4 <- as.data.frame(results(dds_paired, contrast = c("Condition", "PSO_lesional", "PSO_non_lesional"))) %>%
-  rownames_to_column(var = "Gene.name.ID")
-
-## benchmark -------------------------------------------------------------------
-res1 <- res1 %>% dplyr::rename("Gene.name" = "Gene.name.ID") %>% left_join(Final_Annotation_List)
-res2 <- res2 %>% dplyr::rename("Gene.name" = "Gene.name.ID") %>% left_join(Final_Annotation_List)
-res3 <- res3 %>% dplyr::rename("Gene.name" = "Gene.name.ID") %>% left_join(Final_Annotation_List)
-res4 <- res4 %>% dplyr::rename("Gene.name" = "Gene.name.ID") %>% left_join(Final_Annotation_List)
-
-benchmark_plot_RNA(filter(res1, Gene.type == "protein_coding"), "GSE121212: AD vs ctl")
-benchmark_plot_RNA(filter(res2, Gene.type == "protein_coding"), "GSE121212: Pso vs ctl")
-benchmark_plot_RNA(filter(res3, Gene.type == "protein_coding"), "GSE121212: AD paired")
-benchmark_plot_RNA(filter(res4, Gene.type == "protein_coding"), "GSE121212: Pso paired")
-
-# don't write data because I am using results of salmon in the end
-#write_tsv(res1, "data/02_GSE121212_AD_Ctl.tsv")
-#write_tsv(res2, "data/02_GSE121212_PSO_Ctl.tsv")
-#write_tsv(res3, "data/02_GSE121212_AD_paired.tsv")
-#write_tsv(res4, "data/02_GSE121212_PSO_paired.tsv")
-
-# Data set GSE193309 (transcriptomics), AD, skin punch biopsies (paired) --------
-
-#https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE193309
-
-samples.GSE193309 <- read_tsv(paste("data/raw/", "GSE193309_sample_info.txt",sep=""), col_names = c("GEO_Accession (exp)", "Sample"))
-
-meta_raw.GSE193309 <- read_csv(paste("data/raw/", "SraRunTable.GSE193309.txt", sep = ""))
-
-meta_raw.GSE193309 %>% dplyr::count(Subject_ID, Skin_Type, Visit_Date)
-
-meta.GSE193309 <- meta_raw.GSE193309 %>% 
-  filter(visit_id == "01") %>% 
-  group_by(Subject_ID, Skin_Type, Visit_Date) %>% 
-  filter(Bases == max(Bases)) %>% #Some have multiple entries -> selected the one with highest base number
-  ungroup() %>% 
-  merge(samples.GSE193309, by = "GEO_Accession (exp)") %>% 
-  dplyr::rename("GEO_Accession" = "GEO_Accession (exp)") %>% 
-  separate_wider_delim(cols = "Subject_ID", names = c("Disease", "Number"), cols_remove = FALSE, delim = "_") %>% 
-  unite("Condition", c("Disease", "Skin_Type"), remove = FALSE, sep = "_") %>% 
-  dplyr::select(-Number) %>% 
-  dplyr::rename("Patient_ID" = "Subject_ID")
-
-meta.GSE193309 %>% dplyr::count(Patient_ID, Skin_Type) %>% filter(n>1)
-
-#ONLY paired samples analyzed: individually for AD_L_NL
-
-count.GSE193309 <- read_csv(paste("data/raw/", "GSE193309_count_matrix.csv", sep = "")) %>% 
-  dplyr::rename("Gene.name.ID" = "gene_name")   
-
-#Analyze (diff expression: logFold changes)
-# Raw counts fed into DESeq2
-
-coldata_prel <- meta.GSE193309 %>% 
-  #filter(Skin_Type != "HC") %>% #keep paired samples only
-  column_to_rownames(var = "Sample")
-coldata_prel$Condition <- factor(coldata_prel$Condition)
-coldata_prel$Patient_ID <- factor(coldata_prel$Patient_ID)
-coldata <- coldata_prel 
-
-table(coldata$Condition) #Get overview of sample numbers per group
-
-cts_prel <- count.GSE193309 %>%
-  column_to_rownames(var = "Gene.name.ID")
-cts <- as.matrix(cts_prel)
-
-cts <- cts[, rownames(coldata)]
-all(rownames(coldata) %in% colnames(cts)) #compare row/column names
-all(rownames(coldata) == colnames(cts)) #compare row/column name order
-
-# Input data already normalized? Check using boxplot (looks at max 10 random samples)
-Boxplot_prior(cts, "02_boxplot_raw_GSE193309")
-
-# DESeq2 procedure
-# paired samples
-# re factoring patient to avoid matrix full rank
-data.frame(coldata$Patient_ID , coldata$Condition, coldata$Disease)
-
-coldata <- coldata %>%
-  group_by(Disease) %>%
-  mutate(Patient_Num = factor(as.integer(factor(Patient_ID, levels = unique(Patient_ID)))))
-
-print(dplyr::count(coldata, Patient_Num, Disease), n =56)
-
-data.frame(coldata$Patient_ID , coldata$Condition, coldata$Disease, coldata$Patient_Num)
-dds_paired <- DESeqDataSetFromMatrix(countData = cts, colData = coldata, design = ~ Patient_Num + Condition)
-
-# unpaired design
-dds <- DESeqDataSetFromMatrix(countData = cts, colData = coldata, design = ~ Condition)
-
-print(nrow(dds))
-dds <- dds[rowSums(counts(dds)) >= 1,] 
-print(nrow(dds))
-
-# PCA 
-scores <- PCA_norm(dds, "Condition", "02_PCA_GSE193309")
-
-DEseq.output <- DESeq(dds, minReplicatesForReplace=Inf) 
-DEseq.paired.output <- DESeq(dds_paired) # 29 rows did not converge in beta, labelled in mcols(object)$betaConv. Use larger maxit argument with nbinomWaldTest
-
-# Remove gene row(s) without beta convergence (increasing maxit argument did not help)
-DEseq.paired.output <- DEseq.paired.output[which(mcols(DEseq.paired.output)$betaConv),]
-
-# Dispersion estimate QC
-plotDispEsts(DEseq.output)
-plotDispEsts(DEseq.paired.output)
-# disp plots look weird
-
-# Counts normalized for library size
-cts.norm = as.data.frame(counts(DEseq.output, normalized = TRUE))
-
-## Boxplot of DESeq2-normalized data (looks at max 10 random samples)
-Boxplot_post(cts.norm, "02_boxplot_norm_GSE193309")
-
-# log-fold changes (condition-specific)
-#ONLY paired samples analyzed: individually for AD_L_NL
-
-DEG_AD_L_NL <- as.data.frame(results(DEseq.paired.output, contrast = c("Condition", "AD_LS", "AD_NL"))) %>% 
-  rownames_to_column(var = "Gene.name.ID")
-
-DEG_AD_L_NL_Proc <- merge(DEG_AD_L_NL %>% dplyr::rename("Gene.name" = "Gene.name.ID"), Final_Annotation_List)
-#write_tsv(DEG_AD_L_NL_Proc, "data/02_GSE193309_AD_paired.tsv")
-
-benchmark_plot_RNA(DEG_AD_L_NL_Proc, "GSE193309: AD lesional vs non-lesional (paired)")
-
-AD_CTL <- as.data.frame(results(DEseq.output, contrast = c("Condition", "AD_LS", "CO_HC"),
-                                cooksCutoff = F)) %>% 
-  rownames_to_column(var = "Gene.name.ID")
-AD_CTL <- merge(AD_CTL %>% dplyr::rename("Gene.name" = "Gene.name.ID"), Final_Annotation_List)
-#write_tsv(AD_CTL, "data/02_GSE193309_AD_Ctl.tsv")
-
-# don't write data because I am using results of salmon in the end
-
-benchmark_plot_RNA(AD_CTL, "GSE193309: AD lesional vs Ctl")
 
 # Data set GSE138614 (transcriptomics), MS, white brain matter (autopsies) --------
 
