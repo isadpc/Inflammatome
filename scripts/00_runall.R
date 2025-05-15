@@ -5,11 +5,9 @@
 # "AnnotationDbi", "hta20transcriptcluster.db", "HsAgilentDesign026652.db", "hgu219.db"))
 
 
+# Create directory to store figures --------------------------------------------
 figures="figures/"
-resultdir="results/"
 ifelse(!dir.exists(figures), dir.create(figures), FALSE)
-ifelse(!dir.exists(resultdir), dir.create(resultdir), FALSE)
-
 
 # Run all scripts --------------------------------------------------------------
 source(file = 'scripts/01_microarray_DGE.R')

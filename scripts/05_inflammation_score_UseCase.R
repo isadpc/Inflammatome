@@ -2,8 +2,10 @@
 rm(list = ls())
 
 # Load packages-----------------------------------------------------------------
-list.of.packages <- c("ggplot2","ggdist","DESeq2","ggrepel","msigdbr","dplyr","tidyr",
-                      "limma","GO.db","org.Hs.eg.db","readxl","DEP","biomaRt","umap")
+#list.of.packages <- c("ggplot2","ggdist","DESeq2","ggrepel","msigdbr","dplyr","tidyr",
+#                      "limma","GO.db","org.Hs.eg.db","readxl","DEP","biomaRt","umap")
+
+list.of.packages <- c("ggplot2","dplyr","tidyr","limma","DEP","biomaRt")
 
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) BiocManager::install(new.packages)

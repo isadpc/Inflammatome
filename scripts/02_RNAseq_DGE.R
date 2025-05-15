@@ -4,8 +4,8 @@ rm(list = ls())
 # Load packages ----------------------------------------------------------------
 library(tidyverse)
 library(DESeq2)
-library(sjmisc)
-library(janitor)
+#library(sjmisc)
+#library(janitor)
 library(GEOquery)
 library(stringr)
 
