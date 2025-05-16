@@ -5,7 +5,7 @@ rm(list = ls())
 library(tidyverse)
 library(DESeq2)
 #library(sjmisc)
-#library(janitor)
+library(janitor)
 library(GEOquery)
 library(stringr)
 
@@ -401,7 +401,7 @@ meta.GSE138614 <- meta_raw.GSE138614 %>%
 meta.GSE138614 %>% dplyr::count(Individual, Lesion_type)
 table(meta.GSE138614$Condition)
 
-count.GSE138614 <- read_tsv(paste("data/raw/", "GSE138614_countMatrix.txt", sep = "")) %>% 
+count.GSE138614 <- read_tsv(paste("data/raw/", "GSE138614_countMatrix.txt.gz", sep = "")) %>% 
   dplyr::rename("Gene.name.ID" = "...1")
 
 colnames(count.GSE138614) <- c("Gene.name.ID", paste0("Sample_", str_extract(colnames(count.GSE138614)[-1], "(?<=G58-)\\d+")))
@@ -778,7 +778,7 @@ meta.GSE124180 <- meta.GSE124180.proc %>%
 
 rownames(meta.GSE124180)
 
-count.GSE124180_raw <- read_tsv(paste("data/raw/", "GSE124180_gene_count_table.tsv.gz", sep = "")) 
+count.GSE124180_raw <- read_tsv(paste("data/raw/", "GSE124180_gene_count_table.tsv", sep = ""))
 
 count.GSE124180 <- count.GSE124180_raw %>% 
   filter(!row_number() %in% 1) %>% 
@@ -837,6 +837,7 @@ DEG_CTL_COPD <- as.data.frame(results(DEseq.output, contrast = c("Condition", "c
   rownames_to_column(var = "Gene.name.ID") 
 
 DEG_CTL_COPD_Proc <- merge(DEG_CTL_COPD %>% dplyr::rename("ENSG.ID" = "Gene.name.ID"), Final_Annotation_List)
+
 write_tsv(DEG_CTL_COPD_Proc, "data/02_GSE124180_COPD_CTL.tsv")
 
 benchmark_plot_RNA(DEG_CTL_COPD_Proc, "GSE124180: COPD vs Healthy Controls")
