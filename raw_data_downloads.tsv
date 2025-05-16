@@ -1,4 +1,4 @@
-GEO_acc	file_type	expected_path	link
+Dataset	file_type	expected_path	link
 GSE109142	metadata	data/raw/SraRunTable.GSE109142.txt	https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA429769&o=acc_s%3Aa
 GSE198520	count matrix	data/raw/GSE198520_Raw_gene_count_matrix.txt.gz	https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE198520&format=file&file=GSE198520%5FRaw%5Fgene%5Fcount%5Fmatrix%2Etxt%2Egz
 GSE198520	metadata	data/raw/SraRunTable.GSE198520.txt	https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA815686&o=acc_s%3Aa
@@ -14,7 +14,7 @@ GSE126848	count matrix	data/raw/GSE126848_Gene_counts_raw.txt.gz	https://www.ncb
 GSE126848	metadata	data/raw/SraRunTable.GSE126848.txt	https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA523510&o=acc_s%3Aa
 GSE142530	count matrix	data/raw/GSE142530_Annoted-RNAseq-with-SampleIDs.csv.gz	https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE142530&format=file&file=GSE142530%5FAnnoted%2DRNAseq%2Dwith%2DSampleIDs%2Ecsv%2Egz
 GSE142530	metadata	data/raw/SraRunTable.GSE142530.txt	https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA597328&o=acc_s%3Aa
-GSE124180	count matrix	data/raw/GSE124180_gene_count_table.tsv.gz	https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE124180&format=file&file=GSE124180%5Fgene%5Fcount%5Ftable%2Etsv%2Egz
+GSE124180	count matrix	data/raw/GSE124180_gene_count_table.tsv	https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE124180&format=file&file=GSE124180%5Fgene%5Fcount%5Ftable%2Etsv%2Egz
 GSE100297	count matrix	data/raw/GSE100297_hg19.gene_NL_Opt.txt.gz	https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE100297&format=file&file=GSE100297%5Fhg19%2Egene%5FMS%5FOpt%2Etxt%2Egz
 GSE100297	count matrix	data/raw/GSE100297_hg19.gene_MS_Opt.txt.gz	https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE100297&format=file&file=GSE100297%5Fhg19%2Egene%5FNL%5FOpt%2Etxt%2Egz
 GSE100297	metadata	data/raw/SraRunTable.GSE100297.txt	https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA391285&o=acc_s%3Aa
@@ -41,3 +41,4 @@ GSE104704	metadata	data/raw/SraRunTable.GSE104704.txt	https://www.ncbi.nlm.nih.g
 GSE203206	metadata	data/raw/SraRunTable.GSE203206.txt	https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA839035&o=acc_s%3Aa
 GSE193309	metadata	data/raw/SraRunTable.GSE193309.txt	https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA795775&o=acc_s%3Aa
 GSE175759	metadata	data/raw/SraRunTable.GSE175759.txt	https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA733490&o=acc_s%3Aa
+PXD001608	protein abundances + metadata	data/raw/proteinGroups.txt	https://ftp.pride.ebi.ac.uk/pride/data/archive/2015/05/PXD001608/CombinedTxtFiles.zip
