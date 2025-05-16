@@ -22,8 +22,8 @@ This repository contains the R code, data, and scripts for reproducing the analy
   - `08_paper_figures.R`: Scripts to generate figures included in the paper.
   - `99_project_functions.R`: Custom functions used across multiple scripts.
   - `pre-analysis/`: Contains auxiliary scripts used before main analyses. The output of these scripts is frozen for reproducibility:
-    - `gene_annotation.R`: Processes and annotates gene information.
-    - `textmined_markers.R`: Retrieves and processes text-mined inflammatory markers.
+    - `gene_annotation.R`: Processes and annotates gene information. Output is `data/Final_Annotation_List_Biomart.tsv`
+    - `textmined_markers.R`: Retrieves and processes text-mined inflammatory markers. Output is `data/Inflammation_markers_Top100.tsv`
 
 - `figures/`: Figures generated during the analyses. Outputs are stored with prefixes matching the generating script.
 
