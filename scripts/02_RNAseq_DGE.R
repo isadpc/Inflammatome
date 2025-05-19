@@ -4,7 +4,7 @@ rm(list = ls())
 # Load packages ----------------------------------------------------------------
 library(tidyverse)
 library(DESeq2)
-#library(sjmisc)
+library(sjmisc)
 library(janitor)
 library(GEOquery)
 library(stringr)
@@ -860,9 +860,11 @@ meta.GSE100297 <- meta_raw.GSE100297 %>%
     TRUE ~ as.character(disease_state)
   ))
 
-count.GSE100297_CTL_raw <- read_tsv(paste("data/raw/", "GSE100297_hg19.gene_NL_Opt.txt.gz", sep = ""))
+count.GSE100297_CTL_raw <- read_tsv(paste("data/raw/", "GSE100297_hg19.gene_NL_Opt.txt.gz", sep = "")) %>%
+  dplyr::rename(Gene.name.ID = `...1`)
 
-count.GSE100297_MS_raw <- read_tsv(paste("data/raw/", "GSE100297_hg19.gene_MS_Opt.txt.gz", sep = ""))
+count.GSE100297_MS_raw <- read_tsv(paste("data/raw/", "GSE100297_hg19.gene_MS_Opt.txt.gz", sep = "")) %>%
+  dplyr::rename(Gene.name.ID = `...1`)
 
 count.GSE100297 <- merge(count.GSE100297_CTL_raw, count.GSE100297_MS_raw, by = c("Gene.name.ID", "width")) %>% 
   dplyr::select(-width)
@@ -1041,7 +1043,7 @@ benchmark_plot_RNA(res, "GSE66511: PSO vs control")
 
 #https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE197307
 
-meta_raw.GSE197307 <- read_tsv(paste("data/raw/", "GSE197307_series_matrix.txt.gz", sep = ""), skip = 31)
+meta_raw.GSE197307 <- read_tsv(paste("data/raw/", "GSE197307_series_matrix.txt.gz", sep = ""), skip = 32)
 
 meta_temp.GSE197307 <- meta_raw.GSE197307 %>% 
   mutate(`!Sample_title` = paste0(`!Sample_title`, "_", seq(1, nrow(.), 1))) %>% #assign unique names to columns
@@ -1406,7 +1408,7 @@ meta.GSE150910 <- meta_temp.GSE150910 %>%
   relocate(Condition, .before = Disease) %>% 
   filter(Sample_ID != "ipf_H03") #different batch
 
-count.GSE150910_raw <- read_csv(paste("data/raw/", "GSE150910_gene_level_count_file.csv.gz", sep = ""))
+count.GSE150910_raw <- read_csv(paste("data/raw/", "GSE150910_gene-level_count_file.csv.gz", sep = ""))
 
 count.GSE150910 <- count.GSE150910_raw %>% 
   dplyr::rename("Gene.name.ID" = "symbol") %>% 
@@ -1493,11 +1495,11 @@ meta <- pData(gset[[1]])
 meta <- meta %>%
   mutate(Condition = gsub(" ", "_", `disease state:ch1`))
 
-count.GSE231693_raw <- read_tsv(paste("data/raw/GSE231693_count.tsv.gz", sep = ""))
-
-count.GSE231693 <- count.GSE231693_raw %>% 
-  dplyr::rename("Gene.name.ID" = "...1") %>% 
-  filter(!is.na(Gene.name.ID))
+count.GSE231693 <- read.delim(gzfile("data/raw/GSE231693_count.tsv.gz"))
+#count.GSE231693_raw <- read_tsv(paste("data/raw/GSE231693_count.tsv.gz", sep = ""))
+#count.GSE231693 <- count.GSE231693_raw %>% 
+#  dplyr::rename("Gene.name.ID" = "...1") %>% 
+#  filter(!is.na(Gene.name.ID))
 
 #Analyze (diff expression: logFold changes)
 # Raw counts fed into DESeq2
@@ -1510,10 +1512,11 @@ coldata <- coldata_prel
 
 table(coldata$Condition) #Get overview of sample numbers per group
 
-cts_prel <- count.GSE231693 %>%
-  column_to_rownames(var = "Gene.name.ID") 
+#cts_prel <- count.GSE231693 %>%
+#  column_to_rownames(var = "Gene.name.ID") 
 
-cts <- as.matrix(cts_prel)
+#cts <- as.matrix(cts_prel)
+cts <- as.matrix(count.GSE231693)
 
 cts <- cts[, rownames(coldata)]
 all(rownames(coldata) %in% colnames(cts)) #compare row/column names
