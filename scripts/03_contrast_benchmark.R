@@ -427,28 +427,29 @@ ranked.df %>%
  }
 
 ### Plot example ---------------------------------------------------------------
-ranked.df %>%
-  filter(Contrast %in% c("02_GSE166925_CD_CTLlarge", "02_GSE175759_LupusNeph_ctl", "02_GSE142530_AH_CTL", "02_GSE231693_IPF_CTL")) %>%
-  ggplot(aes(x = p_ROC, y = p_markers)) +
-  #geom_path(aes(color = Contrast, linetype = include)) +
-  geom_path(aes(color = Contrast, 
-                linetype = include)) +
-  geom_segment(aes(x = x1,
-                   y = y1,
-                   xend = x2,
-                   yend = y2), 
-               data = segment.benchmark,
-               linewidth = .5) +
-  labs(y = "Proportion of gold standard genes",
-       x = "Genes ranked by decreasing test statistic") +
-  #coord_cartesian(clip = "off") +
-  scale_color_manual(values = myPalette) +
-  scale_linetype_manual(values = c(yes="solid", no="dotted")) +  # Adjust linetypes if needed
-  #guides(
-  #  color = guide_legend(order = 1),      # Legend for color (Contrast)
-  #  linetype = guide_legend(order = 2)    # Legend for linetype (include)
-  #) +
-  plotTheme
-
-ggsave("figures/03_benchmark_example.png",
-       h=7, w=10)
+#ranked.df %>%
+#  filter(Contrast %in% c("02_GSE166925_CD_CTLlarge", "02_GSE175759_LupusNeph_ctl", "02_GSE142530_AH_CTL", "02_GSE231693_IPF_CTL")) %>%
+#  ggplot(aes(x = p_ROC, y = p_markers)) +
+#  #geom_path(aes(color = Contrast, linetype = include)) +
+#  geom_path(aes(color = Contrast, 
+#                linetype = include)) +
+#  geom_segment(aes(x = x1,
+#                   y = y1,
+#                   xend = x2,
+#                   yend = y2), 
+#               data = segment.benchmark,
+#               linewidth = .5) +
+#  labs(y = "Proportion of gold standard genes",
+#       x = "Genes ranked by decreasing test statistic") +
+#  #coord_cartesian(clip = "off") +
+#  scale_color_manual(values = myPalette) +
+#  scale_linetype_manual(values = c(yes="solid", no="dotted")) +  # Adjust linetypes if needed
+#  #guides(
+#  #  color = guide_legend(order = 1),      # Legend for color (Contrast)
+#  #  linetype = guide_legend(order = 2)    # Legend for linetype (include)
+#  #) +
+#  plotTheme
+#
+#ggsave("figures/03_benchmark_example.png",
+#       h=7, w=10)
+#
