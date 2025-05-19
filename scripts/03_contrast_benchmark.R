@@ -333,7 +333,7 @@ for (set in selected.contrasts$dataset){
 }
 
 ### Plot per tissue ------------------------------------------------------------
-selected.contrasts %>% count(tissue)
+selected.contrasts %>% dplyr::count(tissue)
 
 # max contrasts per tissue is 15; need a discrete palette of 15
 selected.contrasts %>% 
@@ -349,29 +349,6 @@ segment.benchmark <- data.frame(x1 = 0,
                                 y1 = 0,
                                 x2 = 1,
                                 y2 = 1)
-
-ranked.df %>%
-  filter(tissue == "skin") %>%
-  ggplot(aes(x = p_annotation, y = p_markers)) +
-  #geom_path(aes(color = Contrast, linetype = include)) +
-  geom_path(aes(color = interaction(Contrast, include), 
-                linetype = interaction(Contrast, include))) +
-  geom_segment(aes(x = x1,
-                   y = y1,
-                   xend = x2,
-                   yend = y2), 
-               data = segment.benchmark,
-               linewidth = .5) +
-  labs(y = "Proportion of gold standard genes",
-       x = "Genes ranked by decreasing test statistic") +
-  #coord_cartesian(clip = "off") +
-  scale_color_manual(values = myPalette) +
-  scale_linetype_manual(values = c("solid", "dashed")) +  # Adjust linetypes if needed
-  #guides(
-  #  color = guide_legend(order = 1),      # Legend for color (Contrast)
-  #  linetype = guide_legend(order = 2)    # Legend for linetype (include)
-  #) +
-  plotTheme 
 
 ranked.df %>%
   filter(tissue == "skin") %>%
