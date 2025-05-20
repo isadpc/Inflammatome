@@ -2,16 +2,11 @@
 rm(list = ls())
 
 # Load packages-----------------------------------------------------------------
-#list.of.packages <- c("ggplot2","ggdist","DESeq2","ggrepel","msigdbr","dplyr","tidyr",
-#                      "limma","GO.db","org.Hs.eg.db","readxl","DEP","biomaRt","umap")
-
-list.of.packages <- c("ggplot2","dplyr","tidyr","limma","DEP","biomaRt")
-
-new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-if(length(new.packages)) BiocManager::install(new.packages)
+#install.packages("ncdf4", configure.args = "--with-nc-config=/opt/homebrew/bin/nc-config")
+#BiocManager::install("DEP")
+list.of.packages <- c("ggplot2","dplyr","tidyr","limma","DEP","biomaRt", "ggrepel")
 
 lapply(list.of.packages, library, character.only=TRUE)
-
 
 # Read the ranked list obtained by aggregation with Birra ----------------------
 ranked.list <- read.csv("data/04_rank_agg_list.tsv",sep="\t",header=TRUE)
@@ -30,14 +25,14 @@ df.prot = df.prot[!df.prot$Contaminant=="+",]
 # Extract Uniprot ID and Gene name from Majority.protein.IDs column
 df.prot$Majority.protein.IDs=as.character(df.prot$Majority.protein.IDs)
 
-#df.prot <- df.prot %>% 
-#  separate_longer_delim(cols=Majority.protein.IDs, delim = ";") %>%
-#  separate_wider_delim(cols=Majority.protein.IDs, names=c('sp', 'UniprotID','Gene.name.full'), 
-#                       delim="|", cols_remove=FALSE, too_many = "error")
-
 df.prot <- df.prot %>% 
+  separate_longer_delim(cols=Majority.protein.IDs, delim = ";") %>%
   separate_wider_delim(cols=Majority.protein.IDs, names=c('sp', 'UniprotID','Gene.name.full'), 
-                       delim="|", cols_remove=FALSE, too_many = "drop")
+                       delim="|", cols_remove=FALSE, too_many = "error")
+
+#df.prot <- df.prot %>% 
+#  separate_wider_delim(cols=Majority.protein.IDs, names=c('sp', 'UniprotID','Gene.name.full'), 
+#                       delim="|", cols_remove=FALSE, too_many = "drop")
 
 df.prot <- df.prot %>% 
   separate_wider_delim(Gene.name.full, names=c('Gene.name', 'Gene.description'), 
