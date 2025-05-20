@@ -46,19 +46,19 @@ msigdb.markers <- msigdb.markers %>%
 union <- full_join(msigdb.markers, Inflamm_Top100_marker)
 
 ## GO terms --------------------------------------------------------------------
-go.markers <- read_tsv("data/markers.go.tsv")
-go.markers.pos <- go.markers %>%
-  filter(gene_biotype =="protein_coding", 
-         GO.name != "negative regulation of inflammatory response", 
-         ENSG.ID %in% Final_Annotation_List$ENSG.ID)
-
-go.markers.neg <- go.markers %>%
-  filter(gene_biotype =="protein_coding", 
-         GO.name == "negative regulation of inflammatory response", 
-         ENSG.ID %in% Final_Annotation_List$ENSG.ID)
-
-go.unique <- data.frame(ENSG.ID = unique(go.markers$ENSG.ID)) %>%
-  filter(ENSG.ID %in% Final_Annotation_List$ENSG.ID)
+#go.markers <- read_tsv("data/markers.go.tsv")
+#go.markers.pos <- go.markers %>%
+#  filter(gene_biotype =="protein_coding", 
+#         GO.name != "negative regulation of inflammatory response", 
+#         ENSG.ID %in% Final_Annotation_List$ENSG.ID)
+#
+#go.markers.neg <- go.markers %>%
+#  filter(gene_biotype =="protein_coding", 
+#         GO.name == "negative regulation of inflammatory response", 
+#         ENSG.ID %in% Final_Annotation_List$ENSG.ID)
+#
+#go.unique <- data.frame(ENSG.ID = unique(go.markers$ENSG.ID)) %>%
+#  filter(ENSG.ID %in% Final_Annotation_List$ENSG.ID)
 
 # Functions --------------------------------------------------------------------
 
