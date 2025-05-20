@@ -215,7 +215,7 @@ all.sets %>% count(gs) %>%
   theme_bw() +
   labs(title = "Distribution of gene set sizes")
 
-# write_tsv(all.sets, "data/06_inflammationGeneSets.tsv") # (06/12/2024)
+#write_tsv(all.sets, "data/06_inflammationGeneSets.tsv") # (06/12/2024)
 
 all.sets <- read_tsv("data/06_inflammationGeneSets.tsv")
 
@@ -417,7 +417,7 @@ results <- results %>%
                                  dataset == "UC.andersen" ~ "UC (Bennike et al.)"),
          Description = if_else(Description == "top100", "Inflammation signature", Description))
 
-#write_tsv(results, "data/06_GSEA_results.tsv")
+write_tsv(results, "data/06_GSEA_results.tsv")
 
 results %>%
   ggplot(aes(x = reorder(dataset_lab, dplyr::desc(-log10(p.adjust))), y = reorder(Description,-log10(p.adjust)))) + 

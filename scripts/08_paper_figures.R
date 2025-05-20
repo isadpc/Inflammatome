@@ -391,14 +391,14 @@ scores <- read.table("data/05_score_UC_andersen.tsv", sep = "\t")
 
 correlation <- cor(scores$expr.UC.100.m, scores$score)
 
-ggplot(data, aes(y = expr.UC.100.m, x = score)) +
+ggplot(scores, aes(y = expr.UC.100.m, x = score)) +
   geom_point() +
   geom_smooth(method = "lm", color = "red", se = FALSE) + 
   #labs(x = paste(type,"inflammatome"), x = "Colon inflammation grade score", title = "") +
   labs(y = "Inflammation signature-based score", x = "Colon inflammation grade score", title = "") +
   theme_classic() +
   # Add correlation coefficient as text
-  annotate("text", y = max(expr.UC.100.mean) + 0.3 , x = max(score), 
+  annotate("text", y = max(scores$expr.UC.100.m) + 0.3 , x = max(scores$score), 
            label = paste("Pearson r =", round(correlation, 2)), 
            hjust = 1.5, vjust = 3, color = "red", size = 3.5)
 
