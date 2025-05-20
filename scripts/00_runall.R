@@ -1,10 +1,3 @@
-## may need to install
-# if (!requireNamespace("BiocManager", quietly = TRUE))
-#   install.packages("BiocManager")
-# BiocManager::install(c("illuminaHumanv4.db", "hgug4112a.db", "hgu133plus2.db", 
-# "AnnotationDbi", "hta20transcriptcluster.db", "HsAgilentDesign026652.db", "hgu219.db"))
-
-
 # Create directory to store figures --------------------------------------------
 figures="figures/"
 ifelse(!dir.exists(figures), dir.create(figures), FALSE)
