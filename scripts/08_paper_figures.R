@@ -86,7 +86,7 @@ selected.contrasts %>%
   dplyr::count(case, dataset, tissue) %>% print(n=33)
 
 ## Make new contrast names -----------------------------------------------------
-selected.contrasts %>% count(dataset)
+selected.contrasts %>% dplyr::count(dataset)
 selected.contrasts %>% distinct(case) %>% print(n=30)
 selected.contrasts %>% distinct(control) %>% print(n=30)
 
