@@ -26,7 +26,7 @@ mus.inf.ensembl <- getBM(attributes = c("ensembl_gene_id" , "hsapiens_homolog_en
                          values = mus.inf.raw$gene.symbol,
                          mart = mouse)
 
-mus.inf.ensembl %>% count(ensembl_gene_id) %>% filter(n>1)
+mus.inf.ensembl %>% dplyr::count(ensembl_gene_id) %>% filter(n>1)
 
 mus.inf.ensembl <- mus.inf.ensembl %>%
   dplyr::rename(ENSG.ID = hsapiens_homolog_ensembl_gene) 

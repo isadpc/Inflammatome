@@ -103,13 +103,13 @@ go <- msigdbr(species = "Homo sapiens", category = "C5") %>%
          gs = gs_name)
 
 go %>% 
-  count(gs)
+  dplyr::count(gs)
 
 length(intersect(go$gene[go$gs == "GOBP_INFLAMMATORY_RESPONSE"], filter(all.genes, Position <= 2000)$ENSG.ID))
 
 go %>% 
   filter(gene %in% Final_Annotation_List$ENSG.ID) %>%
-  count(gs)
+  dplyr::count(gs)
 
 length(unique(filter(go, gs == "GOBP_CYTOKINE_PRODUCTION_INVOLVED_IN_INFLAMMATORY_RESPONSE")$gene_symbol))
 
@@ -120,13 +120,13 @@ setdiff(filter(go, gs == "GOBP_CYTOKINE_PRODUCTION_INVOLVED_IN_INFLAMMATORY_RESP
 
 go %>% 
   group_by(gs) %>%
-  count(gene) %>%
+  dplyr::count(gene) %>%
   filter(n>1)
 
 go %>% 
   filter(gene %in% Final_Annotation_List$ENSG.ID) %>%
   group_by(gs) %>%
-  count(gene) %>%
+  dplyr::count(gene) %>%
   filter(n>1)
 # no duplicates in ENSG.ID
 
@@ -158,11 +158,11 @@ wp <- msigdbr(species = "Homo sapiens", category = "C2") %>%
 #         gs = gs_name)
 
 wp %>% 
-  count(gs)
+  dplyr::count(gs)
 
 wp %>% 
   filter(gene %in% Final_Annotation_List$ENSG.ID) %>%
-  count(gs)
+  dplyr::count(gs)
 
 setdiff(unique(wp$gene), Final_Annotation_List$ENSG.ID) # again located in scaffolds or non-coding
 
@@ -182,11 +182,11 @@ reactome <- msigdbr(species = "Homo sapiens", category = "C2") %>%
          gs = gs_name)
 
 reactome %>% 
-  count(gs)
+  dplyr::count(gs)
 
 reactome %>% 
   filter(gene %in% Final_Annotation_List$ENSG.ID) %>%
-  count(gs)
+  dplyr::count(gs)
 
 setdiff(unique(reactome$gene), Final_Annotation_List$ENSG.ID) 
 
@@ -208,8 +208,8 @@ all.sets <- rbind(
   reactome
 )
 
-all.sets %>% count(gs)
-all.sets %>% count(gs) %>% 
+all.sets %>% dplyr::count(gs)
+all.sets %>% dplyr::count(gs) %>% 
   ggplot(aes(n)) + 
   geom_histogram() +
   theme_bw() +
