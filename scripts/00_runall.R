@@ -1,3 +1,6 @@
+# Set WD -----------------------------------------------------------------------
+setwd("..")
+
 # Create directory to store figures --------------------------------------------
 figures="figures/"
 ifelse(!dir.exists(figures), dir.create(figures), FALSE)
