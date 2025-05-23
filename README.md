@@ -45,7 +45,7 @@ Ensure the following are installed:
 1. Clone this repository to your local machine:
     
    ```bash
-   git clone [[repository URL]](https://github.com/isadpc/Inflammatome.git)
+   git clone https://github.com/isadpc/Inflammatome.git
    cd Inflammatome
 2. Open the repository folder in R or RStudio.
 3. Restore the package environment using `renv`:
