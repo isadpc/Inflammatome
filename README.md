@@ -37,19 +37,23 @@ Ensure the following are installed:
 - **RStudio** (optional but recommended)  
 - **Git** (to clone the repository)  
 - The `renv` R package:
+  
   ```r
   install.packages("renv")
 
 ### Running the Analysis
 1. Clone this repository to your local machine:
+    
    ```bash
-   git clone [repository URL]
-   cd reponame
+   git clone [[repository URL]](https://github.com/isadpc/Inflammatome.git)
+   cd Inflammatome
 2. Open the repository folder in R or RStudio.
 3. Restore the package environment using `renv`:
+   
    ```r
    renv::restore()
 4. Run the full analysis pipeline by sourcing the master script:
+
   ```r
   source("scripts/00_runall.R")
 
