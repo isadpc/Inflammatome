@@ -1,0 +1,21 @@
+INFO [2025-05-20 11:55:48] [[1]]
+INFO [2025-05-20 11:55:48] list(inf, go.inf, mus.inf)
+INFO [2025-05-20 11:55:48] 
+INFO [2025-05-20 11:55:48] $category.names
+INFO [2025-05-20 11:55:48] c("Human Inflammatome", "GO:BP Inflammatory Response", "Mouse Inflammatome")
+INFO [2025-05-20 11:55:48] 
+INFO [2025-05-20 11:55:48] $filename
+INFO [2025-05-20 11:55:48] [1] "figures/07_overlap_top2000_GO_mouse.png"
+INFO [2025-05-20 11:55:48] 
+INFO [2025-05-20 11:55:48] $imagetype
+INFO [2025-05-20 11:55:48] [1] "png"
+INFO [2025-05-20 11:55:48] 
+INFO [2025-05-20 11:55:48] $output
+INFO [2025-05-20 11:55:48] T
+INFO [2025-05-20 11:55:48] 
+INFO [2025-05-20 11:55:48] $fill
+INFO [2025-05-20 11:55:48] c("red", "blue", "green")
+INFO [2025-05-20 11:55:48] 
+INFO [2025-05-20 11:55:48] $margin
+INFO [2025-05-20 11:55:48] [1] 0.1
+INFO [2025-05-20 11:55:48] 
