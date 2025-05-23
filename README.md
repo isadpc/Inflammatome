@@ -53,8 +53,8 @@ Ensure the following are installed:
    ```r
    renv::restore()
 4. Run the full analysis pipeline by sourcing the master script:
-
-  ```r
-  source("scripts/00_runall.R")
+   
+   ```r
+   source("scripts/00_runall.R")
 
 
