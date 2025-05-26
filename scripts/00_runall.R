@@ -1,5 +1,7 @@
-# Set WD -----------------------------------------------------------------------
-setwd("..")
+# Check WD ---------------------------------------------------------------------
+if (!file.exists("scripts/00_runall.R")) {
+  stop("Please set the working directory to the root of the repository before running this script.")
+}
 
 # Create directory to store figures --------------------------------------------
 figures="figures/"
