@@ -1,5 +1,7 @@
 # Mining Inflammation in Human Transcriptomes Codebase
 
+[![DOI](https://zenodo.org/badge/897247785.svg)](https://doi.org/10.5281/zenodo.15516924)
+
 This repository contains the R code, data, and scripts for reproducing the analyses described in the paper **"Mining inflammation in human transcriptomes: a consensus signature across diseases and tissues"**. The repository is organized to allow seamless execution of all analyses, from data preprocessing to figure generation.
 
 ---
