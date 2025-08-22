@@ -4,7 +4,7 @@ rm(list = ls())
 # Load packages-----------------------------------------------------------------
 #install.packages("ncdf4", configure.args = "--with-nc-config=/opt/homebrew/bin/nc-config")
 #BiocManager::install("DEP")
-list.of.packages <- c("ggplot2","dplyr","tidyr","limma","DEP","biomaRt", "ggrepel")
+list.of.packages <- c("ggplot2","dplyr","tidyr","limma","DEP","biomaRt", "ggrepel", "readr")
 
 lapply(list.of.packages, library, character.only=TRUE)
 
@@ -14,7 +14,10 @@ ranked.list <- read.csv("data/04_rank_agg_list.tsv",sep="\t",header=TRUE)
 # Preprocessing ----------------------------------------------------------------
 
 # Read initial data
-df.prot = read.table("data/raw/proteinGroups.txt", header=T, sep="\t",
+#df.prot = read.table("data/raw/proteinGroups.txt", header=T, sep="\t",
+#                     stringsAsFactors = F, comment.char = "", quote ="")
+# temporarily bc in current data/raw I have only things allowed to upload to github
+df.prot = read.table("~/Documents/inflammatome_R_submission/raw/proteinGroups.txt", header=T, sep="\t",
                      stringsAsFactors = F, comment.char = "", quote ="")
 df.prot<-df.prot[-1,]
 
@@ -105,6 +108,7 @@ plot_missval(data_norm)
 plot_detect(data_norm)
 
 # Imputation of left-censored missing data
+set.seed(1234)
 data_imp <- impute(data_norm, fun = "MinProb", q = 0.01)
 plot_imputation(data_norm, data_imp)
 data.vsn.imp = as.data.frame(data_imp@assays@data)
@@ -140,7 +144,7 @@ ggplot(pca_data, aes(x = PC1, y = PC2, color = condition)) +
   theme_classic() +
   theme(legend.title = element_blank())
 
-ggsave("figures/05_PCA_UC_andersen.png", device = "png", width = 6, height = 5)
+#ggsave("figures/05_PCA_UC_andersen.png", device = "png", width = 6, height = 5)
 
 
 
@@ -166,7 +170,8 @@ filtered.res <- res %>%
   slice_min(P.Value, n = 1, with_ties = FALSE) %>%
   ungroup()
 
-write.table(filtered.res, "data/05_DE_UC_andersen.tsv", sep = "\t", row.names = F, quote=F)
+write.table(filtered.res, "data/rev1/05_DE_UC_andersen.tsv", sep = "\t", row.names = F, quote=F)
+
 
 # Correlation with severity ----------------------------------------------------
 
