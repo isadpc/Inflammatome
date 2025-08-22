@@ -220,18 +220,69 @@ expr.UC.100.median <- apply(expr.UC.markers.100, 2, median)
 expr.UC.100.m = expr.UC.100.mean; type="mean"
 #expr.UC.100.m = expr.UC.100.median; type="median"
 
+# Calculate mean for TAURUS score genes
+taurus <- readxl::read_excel("data/rev1/41590_2024_1994_MOESM6_ESM.xlsx", sheet = "Inflammation_score")
+length(intersect(ranked.list$ENSG.ID[1:100], taurus$Inflammation_score_genes))
+# 55
+length(intersect(ranked.list$ENSG.ID[1:2000], taurus$Inflammation_score_genes))
+# 386
+expr.UC.taurus <- expr.UC[taurus$Inflammation_score_genes,] %>% drop_na()
+expr.UC.taurus.mean <- apply(expr.UC.taurus, 2, mean)
+
+length(intersect(rownames(expr.UC.markers.100), rownames(expr.UC.taurus)))
+
+# Calculate mean for bMIS score genes
+bMIS <- readxl::read_excel("data/rev1/bMIS_score.xlsx", sheet = "bMIS_IBD")
+# map gene symbols to ensgs
+bMIS <- bMIS %>%
+  left_join(genes.ensembl, by = join_by(bMIS_IBD == hgnc_symbol)) %>%
+  drop_na() 
+# a lot of genes don't have a match
+length(intersect(ranked.list$ENSG.ID[1:100], bMIS$ensembl_gene_id))
+# 3
+length(intersect(ranked.list$ENSG.ID[1:2000], bMIS$ensembl_gene_id))
+# 32
+expr.UC.bMIS <- expr.UC[bMIS$ensembl_gene_id,] %>% drop_na()
+expr.UC.bMIS.mean <- apply(expr.UC.bMIS, 2, mean)
+
+length(intersect(rownames(expr.UC.markers.100), rownames(expr.UC.bMIS)))
+
 # also defined by me: score
 score <- metadata$Colon_Inflammation_Grade_Score
 
-data <- data.frame(expr.UC.100.m, score); correlation <- cor(expr.UC.100.m, score)
+data <- data.frame(expr.UC.100.m, expr.UC.taurus.mean, expr.UC.bMIS.mean, score); correlation <- cor(expr.UC.100.m, score)
+correlation <- cor(expr.UC.taurus.mean, score)
+correlation <- cor(expr.UC.bMIS.mean, score)
 
-write.table(data, "data/05_score_UC_andersen.tsv", sep = "\t", row.names = T, quote=F)
+#write.table(data, "data/05_score_UC_andersen.tsv", sep = "\t", row.names = T, quote=F)
 
 ggplot(data, aes(y = expr.UC.100.m, x = score)) +
   geom_point() +
   geom_smooth(method = "lm", color = "red", se = FALSE) + 
   #labs(x = paste(type,"inflammatome"), x = "Colon inflammation grade score", title = "") +
   labs(y = "Inflammation signature-based score", x = "Colon inflammation grade score", title = "") +
+  theme_classic() +
+  # Add correlation coefficient as text
+  annotate("text", y = max(expr.UC.100.mean) + 0.3 , x = max(score), 
+           label = paste("Pearson r =", round(correlation, 2)), 
+           hjust = 1.5, vjust = 3, color = "red", size = 3.5)
+
+ggplot(data, aes(y = expr.UC.taurus.mean, x = score)) +
+  geom_point() +
+  geom_smooth(method = "lm", color = "red", se = FALSE) + 
+  #labs(x = paste(type,"inflammatome"), x = "Colon inflammation grade score", title = "") +
+  labs(y = "TAURUS signature-based score", x = "Colon inflammation grade score", title = "") +
+  theme_classic() +
+  # Add correlation coefficient as text
+  annotate("text", y = max(expr.UC.100.mean) + 0.3 , x = max(score), 
+           label = paste("Pearson r =", round(correlation, 2)), 
+           hjust = 1.5, vjust = 3, color = "red", size = 3.5)
+
+ggplot(data, aes(y = expr.UC.bMIS.mean, x = score)) +
+  geom_point() +
+  geom_smooth(method = "lm", color = "red", se = FALSE) + 
+  #labs(x = paste(type,"inflammatome"), x = "Colon inflammation grade score", title = "") +
+  labs(y = "TAURUS signature-based score", x = "Colon inflammation grade score", title = "") +
   theme_classic() +
   # Add correlation coefficient as text
   annotate("text", y = max(expr.UC.100.mean) + 0.3 , x = max(score), 
